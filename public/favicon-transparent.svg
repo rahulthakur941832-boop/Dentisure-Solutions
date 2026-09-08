@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+    
+<defs>
+  <!-- Tooth Gradient: Deep Navy to Vibrant Cyan-Teal -->
+  <linearGradient id="toothGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="#072238" />
+    <stop offset="40%" stop-color="#0A365C" />
+    <stop offset="70%" stop-color="#00808F" />
+    <stop offset="100%" stop-color="#00A7B5" />
+  </linearGradient>
+
+  <!-- Growth Bars & Swoop Arrow Gradient -->
+  <linearGradient id="chartGradient" x1="0%" y1="100%" x2="40%" y2="0%">
+    <stop offset="0%" stop-color="#007788" />
+    <stop offset="100%" stop-color="#00A7B5" />
+  </linearGradient>
+
+  <!-- Soft ground shadow under tooth roots -->
+  <radialGradient id="groundShadow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#072238" stop-opacity="0.25" />
+    <stop offset="50%" stop-color="#0A365C" stop-opacity="0.08" />
+    <stop offset="100%" stop-color="#0A365C" stop-opacity="0" />
+  </radialGradient>
+</defs>
+
+    <!-- Tooth Logo Centered (Transparent) -->
+    <g transform="translate(56, 52) scale(2.9)">
+      
+    
+
+    <g id="tooth-mark">
+      <!-- Outer Tooth Contour Outline -->
+      <path 
+        d="M 38 24 
+           C 22 28, 14 44, 15 62 
+           C 16 78, 22 92, 28 108 
+           C 31 116, 36 122, 42 120 
+           C 48 118, 51 106, 53 96 
+           C 54 88, 57 82, 65 82 
+           C 73 82, 76 88, 77 96 
+           C 79 106, 82 118, 88 120 
+           C 94 122, 99 116, 102 108 
+           C 108 92, 114 78, 115 62 
+           C 116 44, 108 28, 92 24 
+           C 82 21, 74 25, 65 25 
+           C 56 25, 48 21, 38 24 Z"
+        fill="none" 
+        stroke="url(#toothGradient)" 
+        stroke-width="7.5" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+      />
+
+      <!-- Dynamic Rising Swoop Arc (starting from left root curve) -->
+      <path 
+        d="M 27 86 
+           C 35 94, 46 95, 56 86 
+           C 68 75, 78 58, 88 42" 
+        fill="none" 
+        stroke="url(#chartGradient)" 
+        stroke-width="4.2" 
+        stroke-linecap="round" 
+      />
+
+      <!-- 3 Growth Histogram Bars (as in the client original design) -->
+      <!-- Bar 1 (Shortest) -->
+      <rect x="44" y="73" width="7.5" height="17" rx="1.5" fill="url(#chartGradient)" />
+      <!-- Bar 2 (Medium) -->
+      <rect x="55" y="61" width="7.5" height="29" rx="1.5" fill="url(#chartGradient)" />
+      <!-- Bar 3 (Tallest) -->
+      <rect x="66" y="49" width="7.5" height="41" rx="1.5" fill="url(#chartGradient)" />
+
+      <!-- Upward Growth Arrow pointing towards top-right crown -->
+      <path 
+        d="M 86 44 
+           C 90 38, 93 33, 96 27" 
+        fill="none" 
+        stroke="url(#chartGradient)" 
+        stroke-width="4.8" 
+        stroke-linecap="round" 
+      />
+      <!-- Arrowhead -->
+      <polygon 
+        points="97,22 86,28 94,34" 
+        fill="#00A7B5" 
+      />
+    </g>
+  
+    </g>
+  </svg>

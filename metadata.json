@@ -1,0 +1,6 @@
+{
+  "name": "DentiSure Solutions",
+  "description": "Your Certainty in Dental Revenue. US dental insurance claims billing, verification, and revenue cycle management service.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
