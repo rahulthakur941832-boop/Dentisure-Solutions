@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Logo } from './Logo';
-import { BrandAssetKit } from './BrandAssetKit';
 import { useCms } from '../context/CmsContext';
 import { NavigationPage } from '../types';
 import {
@@ -12,8 +11,6 @@ import {
   Clock,
   MapPin,
   CalendarCheck,
-  Sparkles,
-  X,
 } from 'lucide-react';
 
 interface FooterProps {
@@ -28,7 +25,6 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenBrochureModal,
 }) => {
   const { cmsData } = useCms();
-  const [showBrandKit, setShowBrandKit] = useState(false);
 
   const handleNav = (page: NavigationPage) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -237,21 +233,21 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
         </div>
 
-        {/* Bottom Disclaimers and Copyright */}
-        <div className="pt-8 border-t border-slate-800 text-[11px] text-slate-400 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            {cmsData.footer.copyright}
+        {/* Bottom Disclaimers, Agency Credit, and Copyright */}
+        <div className="pt-8 border-t border-slate-800 text-[11px] text-slate-400 flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
+            <span>{cmsData.footer.copyright}</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-slate-400">
-            <button
-              onClick={() => setShowBrandKit(true)}
-              className="hover:text-teal-300 cursor-pointer flex items-center gap-1 text-teal-400 font-semibold"
-            >
-              <Sparkles className="w-3 h-3 text-teal-400" />
-              <span>Brand Assets &amp; Logos</span>
-            </button>
-            <span>&bull;</span>
+          {/* Agency Credit Badge: ClickIn Digital Marketing Agency (ClickIn DMA) */}
+          <div className="inline-flex items-center gap-2 bg-slate-900/90 border border-teal-500/40 px-3.5 py-1.5 rounded-full shadow-xs text-center">
+            <span className="text-[10.5px] text-slate-400 font-medium">Website Designed &amp; Developed by</span>
+            <span className="text-[11.5px] font-bold text-teal-300 tracking-wide">
+              {cmsData.footer.agencyCredit || 'ClickIn Digital Marketing Agency (ClickIn DMA)'}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-slate-400">
             <button onClick={() => handleNav('terms')} className="hover:text-teal-300 cursor-pointer">
               Terms of Service
             </button>
@@ -263,6 +259,18 @@ export const Footer: React.FC<FooterProps> = ({
             <button onClick={() => handleNav('hipaa')} className="hover:text-teal-300 cursor-pointer">
               HIPAA &amp; BAA Compliance
             </button>
+            <span>&bull;</span>
+            <button
+              onClick={() => {
+                window.location.hash = '#/admin';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="text-teal-400 hover:text-teal-200 font-semibold cursor-pointer flex items-center gap-1"
+              title="Open Admin CMS Portal"
+            >
+              <Lock className="w-3 h-3" />
+              <span>Admin CMS Portal</span>
+            </button>
           </div>
         </div>
 
@@ -270,36 +278,6 @@ export const Footer: React.FC<FooterProps> = ({
           {cmsData.footer.disclaimer}
         </div>
       </div>
-
-      {/* Brand Assets Modal */}
-      {showBrandKit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white text-slate-900 w-full max-w-5xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-8 max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-150">
-            <div className="bg-[#12304A] text-white px-6 py-4 flex items-center justify-between border-b border-slate-700 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <img
-                  src="/favicon-white.png"
-                  alt="DentiSure"
-                  className="w-7 h-7 rounded-lg object-contain bg-white p-0.5"
-                />
-                <div>
-                  <span className="font-bold text-sm block">DentiSure Solutions — Client Brand Assets</span>
-                  <span className="text-[10px] text-teal-400 font-medium block">All Authorized Logo &amp; Favicon Formats</span>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowBrandKit(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto flex-1 bg-slate-50">
-              <BrandAssetKit onClose={() => setShowBrandKit(false)} isModal={true} />
-            </div>
-          </div>
-        </div>
-      )}
     </footer>
   );
 };

@@ -14,6 +14,8 @@ import { LegalPage } from './pages/LegalPage';
 import { AdminApp } from './admin/AdminApp';
 import { useCms } from './context/CmsContext';
 import { LeadSubmission, NavigationPage } from './types';
+import { updateDocumentFavicon } from './utils/googleDrive';
+import { PageLoader } from './components/PageLoader';
 
 export function App() {
   const [currentPage, setCurrentPage] = useState<NavigationPage>('home');
@@ -60,6 +62,14 @@ export function App() {
       document.title = 'DentiSure CMS — Standalone Admin Portal';
     }
   }, [cmsData.seo?.siteTitle, isAdminRoute]);
+
+  // Synchronize favicon with Google Drive or custom branding
+  useEffect(() => {
+    const faviconUrl = cmsData.branding?.googleDriveFaviconUrl || cmsData.branding?.customFaviconUrl;
+    if (faviconUrl) {
+      updateDocumentFavicon(faviconUrl);
+    }
+  }, [cmsData.branding?.googleDriveFaviconUrl, cmsData.branding?.customFaviconUrl]);
 
   const handleOpenAudit = (production?: string, gain?: string) => {
     if (production) setAuditProduction(production);
@@ -108,6 +118,9 @@ export function App() {
   // Public Dental Practice Website
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFB] text-[#12304A]">
+      {/* White Screen Animated Brand Preloader */}
+      <PageLoader />
+
       {/* Primary Sticky Header */}
       <Header
         currentPage={currentPage}
@@ -192,6 +205,21 @@ export function App() {
         onClose={() => setIsBrochureModalOpen(false)}
         onOpenAudit={() => handleOpenAudit()}
       />
+
+      {/* Floating Admin Panel Launcher for Quick Access */}
+      <div className="fixed bottom-4 right-4 z-40">
+        <button
+          onClick={() => {
+            window.location.hash = '#/admin';
+            setIsAdminRoute(true);
+          }}
+          className="bg-slate-900/90 hover:bg-[#12304A] text-white border border-slate-700/80 shadow-xl px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer backdrop-blur-md group hover:shadow-2xl hover:scale-105"
+          title="Open DentiSure Admin CMS Portal"
+        >
+          <span className="w-2 h-2 rounded-full bg-[#16A6A3] animate-pulse" />
+          <span>Admin CMS</span>
+        </button>
+      </div>
     </div>
   );
 }

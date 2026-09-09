@@ -6,6 +6,7 @@ import {
   ResourceArticle,
   LegalDocument,
   MediaItem,
+  HeaderNavItem,
 } from '../types';
 import { INITIAL_CMS_DATA } from '../data/initialCmsData';
 import { INITIAL_LEADS } from '../data/contentData';
@@ -61,6 +62,13 @@ interface CmsContextType {
   // Legal Document Management
   updateLegalDoc: (type: 'terms' | 'privacy' | 'hipaa', doc: LegalDocument) => void;
 
+  // Header Navigation Management
+  addHeaderNavItem: (item: Omit<HeaderNavItem, 'id'>) => void;
+  updateHeaderNavItem: (id: string, updates: Partial<HeaderNavItem>) => void;
+  deleteHeaderNavItem: (id: string) => void;
+  reorderHeaderNavItems: (items: HeaderNavItem[]) => void;
+  resetHeaderNavItems: () => void;
+
   // UI Modal control
   isAdminPanelOpen: boolean;
   isLoginModalOpen: boolean;
@@ -79,7 +87,36 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const saved = localStorage.getItem(CMS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...INITIAL_CMS_DATA, ...parsed };
+        return {
+          ...INITIAL_CMS_DATA,
+          ...parsed,
+          brand: {
+            ...INITIAL_CMS_DATA.brand,
+            ...(parsed.brand || {}),
+            // Ensure no legacy Austin / US placeholder remains if previously saved
+            address: parsed.brand?.address?.includes('Austin') ? INITIAL_CMS_DATA.brand.address : (parsed.brand?.address || INITIAL_CMS_DATA.brand.address),
+          },
+          header: {
+            ...INITIAL_CMS_DATA.header,
+            ...(parsed.header || {}),
+            topNoticeBadge: undefined, // remove Live Operations
+            topNotice: (parsed.header?.topNotice && !parsed.header.topNotice.includes('50 US States'))
+              ? parsed.header.topNotice
+              : INITIAL_CMS_DATA.header.topNotice,
+            navItems: (parsed.header?.navItems && parsed.header.navItems.length > 0)
+              ? parsed.header.navItems
+              : INITIAL_CMS_DATA.header.navItems,
+          },
+          footer: {
+            ...INITIAL_CMS_DATA.footer,
+            ...(parsed.footer || {}),
+            agencyCredit: parsed.footer?.agencyCredit || INITIAL_CMS_DATA.footer.agencyCredit,
+          },
+          branding: {
+            ...INITIAL_CMS_DATA.branding,
+            ...(parsed.branding || {}),
+          },
+        };
       }
     } catch (e) {
       console.warn('Failed to load CMS data from localStorage:', e);
@@ -350,6 +387,65 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
   };
 
+  // Header Navigation Actions
+  const addHeaderNavItem = (item: Omit<HeaderNavItem, 'id'>) => {
+    const newItem: HeaderNavItem = {
+      ...item,
+      id: `nav-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      order: item.order ?? ((cmsData.header.navItems?.length || 0) + 1),
+    };
+    setCmsData((prev) => ({
+      ...prev,
+      header: {
+        ...prev.header,
+        navItems: [...(prev.header.navItems || []), newItem],
+      },
+    }));
+  };
+
+  const updateHeaderNavItem = (id: string, updates: Partial<HeaderNavItem>) => {
+    setCmsData((prev) => ({
+      ...prev,
+      header: {
+        ...prev.header,
+        navItems: (prev.header.navItems || []).map((item) =>
+          item.id === id ? { ...item, ...updates } : item
+        ),
+      },
+    }));
+  };
+
+  const deleteHeaderNavItem = (id: string) => {
+    setCmsData((prev) => ({
+      ...prev,
+      header: {
+        ...prev.header,
+        navItems: (prev.header.navItems || []).filter((item) => item.id !== id),
+      },
+    }));
+  };
+
+  const reorderHeaderNavItems = (items: HeaderNavItem[]) => {
+    const reordered = items.map((item, idx) => ({ ...item, order: idx + 1 }));
+    setCmsData((prev) => ({
+      ...prev,
+      header: {
+        ...prev.header,
+        navItems: reordered,
+      },
+    }));
+  };
+
+  const resetHeaderNavItems = () => {
+    setCmsData((prev) => ({
+      ...prev,
+      header: {
+        ...prev.header,
+        navItems: INITIAL_CMS_DATA.header.navItems,
+      },
+    }));
+  };
+
   return (
     <CmsContext.Provider
       value={{
@@ -376,6 +472,11 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateMediaItem,
         deleteMediaItem,
         updateLegalDoc,
+        addHeaderNavItem,
+        updateHeaderNavItem,
+        deleteHeaderNavItem,
+        reorderHeaderNavItems,
+        resetHeaderNavItems,
         isAdminPanelOpen,
         isLoginModalOpen,
         openAdminPanel: () => {

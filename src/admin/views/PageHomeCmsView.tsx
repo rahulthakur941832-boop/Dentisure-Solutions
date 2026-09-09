@@ -14,12 +14,22 @@ import {
   ShieldCheck,
   Eye,
   Sliders,
+  Video,
+  Play,
+  Image as ImageIcon,
+  Activity,
+  Award,
+  BarChart3,
+  ListFilter,
+  Tag,
+  Building,
 } from 'lucide-react';
-import { FAQItem, TestimonialItem } from '../../types';
+import { FAQItem, TestimonialItem, HeroPerspective, HeroPerspectiveOption } from '../../types';
 
 export const PageHomeCmsView: React.FC = () => {
   const { cmsData, updateSection } = useCms();
   const [activeSubTab, setActiveSubTab] = useState<'hero' | 'metrics' | 'why' | 'testimonials' | 'faq' | 'cta'>('hero');
+  const [activePerspective, setActivePerspective] = useState<HeroPerspective>('elite');
   const [savedAlert, setSavedAlert] = useState(false);
 
   // Local working copy of home data
@@ -134,11 +144,12 @@ export const PageHomeCmsView: React.FC = () => {
 
       {/* SUB-TAB 1: HERO SECTION */}
       {activeSubTab === 'hero' && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div className="space-y-6 text-xs">
+          {/* Top Hero Save Bar */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-slate-900">Main Hero Headline &amp; Buttons</h2>
-              <p className="text-xs text-slate-500">Above-the-fold value proposition and primary CTAs.</p>
+              <h2 className="text-sm font-bold text-slate-900">Hero Section Content &amp; Media CMS</h2>
+              <p className="text-xs text-slate-500">Edit headlines, switch video/image media, customize 3 patient viewpoints, and manage operations desk.</p>
             </div>
             <button
               onClick={handleSaveHero}
@@ -149,212 +160,562 @@ export const PageHomeCmsView: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Top Badge Pill</label>
-              <input
-                type="text"
-                value={hero.badge}
-                onChange={(e) => setHero({ ...hero, badge: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white"
-              />
-            </div>
+          {/* 1. Main Headline & Copy (Above the Fold) */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#16A6A3]" />
+              <span>1. Main Hero Headline &amp; Core CTAs</span>
+            </h3>
 
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Highlight Word / Keyword</label>
-              <input
-                type="text"
-                value={hero.highlightedWord}
-                onChange={(e) => setHero({ ...hero, highlightedWord: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white"
-              />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Top Badge Pill</label>
+                <input
+                  type="text"
+                  value={hero.badge || ''}
+                  onChange={(e) => setHero({ ...hero, badge: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl"
+                  placeholder="Pan-India Dental Revenue Cycle & Billing Management"
+                />
+              </div>
 
-            <div className="md:col-span-2">
-              <label className="block font-bold text-slate-700 mb-1">Main H1 Title</label>
-              <input
-                type="text"
-                value={hero.title}
-                onChange={(e) => setHero({ ...hero, title: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:bg-white"
-              />
-            </div>
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Highlight Word / Keyword</label>
+                <input
+                  type="text"
+                  value={hero.highlightedWord || ''}
+                  onChange={(e) => setHero({ ...hero, highlightedWord: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl"
+                  placeholder="Automated Revenue Machine"
+                />
+              </div>
 
-            <div className="md:col-span-2">
-              <label className="block font-bold text-slate-700 mb-1">Subtitle / Body Paragraph</label>
-              <textarea
-                rows={3}
-                value={hero.subtitle}
-                onChange={(e) => setHero({ ...hero, subtitle: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white"
-              />
-            </div>
+              <div className="md:col-span-2">
+                <label className="block font-bold text-slate-700 mb-1">Main H1 Title</label>
+                <input
+                  type="text"
+                  value={hero.title || ''}
+                  onChange={(e) => setHero({ ...hero, title: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900"
+                  placeholder="Transform Your Dental Practice Into an"
+                />
+              </div>
 
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Primary CTA Button</label>
-              <input
-                type="text"
-                value={hero.ctaPrimary}
-                onChange={(e) => setHero({ ...hero, ctaPrimary: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white"
-              />
-            </div>
+              <div className="md:col-span-2">
+                <label className="block font-bold text-slate-700 mb-1">Subtitle / Body Paragraph</label>
+                <textarea
+                  rows={3}
+                  value={hero.subtitle || ''}
+                  onChange={(e) => setHero({ ...hero, subtitle: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl leading-relaxed"
+                />
+              </div>
 
-            <div>
-              <label className="block font-bold text-slate-700 mb-1">Secondary CTA Button</label>
-              <input
-                type="text"
-                value={hero.ctaSecondary}
-                onChange={(e) => setHero({ ...hero, ctaSecondary: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white"
-              />
-            </div>
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Primary CTA Button</label>
+                <input
+                  type="text"
+                  value={hero.ctaPrimary || ''}
+                  onChange={(e) => setHero({ ...hero, ctaPrimary: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl"
+                  placeholder="Claim Free Practice Audit"
+                />
+              </div>
 
-            <div className="md:col-span-2">
-              <label className="block font-bold text-slate-700 mb-1">Hero Image URL</label>
-              <input
-                type="text"
-                value={hero.heroImage}
-                onChange={(e) => setHero({ ...hero, heroImage: e.target.value })}
-                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-[11px] focus:ring-2 focus:ring-teal-500 focus:bg-white"
-              />
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Secondary CTA Button</label>
+                <input
+                  type="text"
+                  value={hero.ctaSecondary || ''}
+                  onChange={(e) => setHero({ ...hero, ctaSecondary: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl"
+                  placeholder="Explore Indian PMS Integrations"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Secondary Hero Carousel Slides */}
-          <div className="pt-6 border-t border-slate-200">
-            <div className="flex items-center justify-between mb-3">
+          {/* 2. Visual Media Switcher (Video vs Image) */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
               <div>
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  Secondary Rotating Carousel Slides ({hero.secondarySlides.length})
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Video className="w-4 h-4 text-[#16A6A3]" />
+                  <span>2. Hero Visual Media (Video vs Image)</span>
                 </h3>
-                <p className="text-[11px] text-slate-500">Feature bullets displayed on the interactive hero rotator.</p>
+                <p className="text-[11px] text-slate-500">Toggle whether the hero displays an animated video background/player or a high-res image.</p>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setHero({
-                    ...hero,
-                    secondarySlides: [
-                      ...hero.secondarySlides,
-                      {
-                        title: 'New Service Capability',
-                        subtitle: 'Detailed benefit description for dental practices.',
-                        metric: '+98% Scrubbed',
-                        badge: 'New Feature',
-                      },
-                    ],
-                  });
-                }}
-                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Slide</span>
-              </button>
+
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setHero({ ...hero, mediaType: 'image' })}
+                  className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer ${
+                    hero.mediaType !== 'video'
+                      ? 'bg-white text-[#12304A] shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <ImageIcon className="w-3.5 h-3.5" />
+                  <span>Image</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHero({ ...hero, mediaType: 'video' })}
+                  className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer ${
+                    hero.mediaType === 'video'
+                      ? 'bg-[#16A6A3] text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  <span>Video Stream</span>
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              {hero.secondarySlides.map((slide, idx) => (
-                <div key={idx} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-700 text-xs">Slide #{idx + 1}</span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        disabled={idx === 0}
-                        onClick={() => {
-                          const updated = moveItem(hero.secondarySlides, idx, 'up');
-                          setHero({ ...hero, secondarySlides: updated });
-                        }}
-                        className="p-1 hover:bg-slate-200 rounded disabled:opacity-30 cursor-pointer"
-                        title="Move Up"
-                      >
-                        <ArrowUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={idx === hero.secondarySlides.length - 1}
-                        onClick={() => {
-                          const updated = moveItem(hero.secondarySlides, idx, 'down');
-                          setHero({ ...hero, secondarySlides: updated });
-                        }}
-                        className="p-1 hover:bg-slate-200 rounded disabled:opacity-30 cursor-pointer"
-                        title="Move Down"
-                      >
-                        <ArrowDown className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setHero({
-                            ...hero,
-                            secondarySlides: hero.secondarySlides.filter((_, i) => i !== idx),
-                          });
-                        }}
-                        className="p-1 text-rose-500 hover:bg-rose-50 rounded cursor-pointer"
-                        title="Delete Slide"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+            {hero.mediaType === 'video' ? (
+              <div className="space-y-4 bg-teal-50/40 p-4 rounded-xl border border-teal-200/80">
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1 flex items-center gap-1">
+                    <Video className="w-3.5 h-3.5 text-[#16A6A3]" />
+                    <span>Video URL (YouTube Embed / Vimeo / MP4 Stream)</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={hero.videoUrl || ''}
+                    onChange={(e) => setHero({ ...hero, videoUrl: e.target.value })}
+                    placeholder="https://www.youtube.com/watch?v=... or direct MP4 link"
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-mono text-xs"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    Supports standard YouTube watch links, YouTube shorts, Vimeo, or direct .mp4/.webm video URLs.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Video Poster / Fallback Image URL</label>
+                  <input
+                    type="url"
+                    value={hero.videoPoster || hero.heroImage || ''}
+                    onChange={(e) => setHero({ ...hero, videoPoster: e.target.value })}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-mono text-xs"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
+                  <ImageIcon className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Hero Background Image URL</span>
+                </label>
+                <input
+                  type="url"
+                  value={hero.heroImage || ''}
+                  onChange={(e) => setHero({ ...hero, heroImage: e.target.value })}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono text-xs"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* 3. Patient Viewpoint & 3 Perspective Options */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+              <div>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <ListFilter className="w-4 h-4 text-[#16A6A3]" />
+                  <span>3. Patient Viewpoint: 3 Interactive Perspectives</span>
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Allow doctors to toggle between clinical perspectives on the live hero. All 3 options are fully editable.
+                </p>
+              </div>
+
+              <div>
+                <input
+                  type="text"
+                  value={hero.viewpointTitle || 'Practice Viewpoint:'}
+                  onChange={(e) => setHero({ ...hero, viewpointTitle: e.target.value })}
+                  placeholder="Practice Viewpoint:"
+                  className="p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700"
+                  title="Section Header Label"
+                />
+              </div>
+            </div>
+
+            {/* 3 Option Tabs */}
+            <div className="flex gap-2 p-1.5 bg-slate-100 rounded-xl border border-slate-200">
+              {(['elite', 'stress-free', 'growth'] as HeroPerspective[]).map((key) => {
+                const opt = hero.perspectives?.[key];
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setActivePerspective(key)}
+                    className={`flex-1 py-2 px-3 rounded-lg font-bold transition-all cursor-pointer text-center ${
+                      activePerspective === key
+                        ? 'bg-white text-[#12304A] shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {opt?.tabLabel || key}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Active Perspective Editor */}
+            {(() => {
+              const currentOpt = hero.perspectives?.[activePerspective] || {
+                id: activePerspective,
+                tabLabel: activePerspective === 'elite' ? 'Elite Standard' : activePerspective === 'stress-free' ? 'Stress-Free Clinic' : 'Growth & Multi-Chair',
+                badge: 'Dental Revenue Machine',
+                headline: 'Transform Your Dental Practice',
+                highlightText: 'Automated Revenue Machine',
+                subheadline: 'Complete dental billing management.',
+                primaryCta: 'Claim Free Practice Audit',
+                secondaryCta: 'Explore Indian PMS Integrations',
+                highlightPills: ['Collections', 'Fast Turnaround'],
+              };
+
+              const updateActivePerspective = (updatedFields: Partial<HeroPerspectiveOption>) => {
+                const copyPerspectives = { ...(hero.perspectives || {}) };
+                copyPerspectives[activePerspective] = {
+                  ...currentOpt,
+                  ...updatedFields,
+                };
+                setHero({ ...hero, perspectives: copyPerspectives as any });
+              };
+
+              return (
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Tab Button Label</label>
+                      <input
+                        type="text"
+                        value={currentOpt.tabLabel}
+                        onChange={(e) => updateActivePerspective({ tabLabel: e.target.value })}
+                        className="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Badge Pill</label>
+                      <input
+                        type="text"
+                        value={currentOpt.badge}
+                        onChange={(e) => updateActivePerspective({ badge: e.target.value })}
+                        className="w-full p-2 bg-white border border-slate-300 rounded-lg"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block font-bold text-slate-700 mb-1">Perspective Main Headline</label>
+                      <input
+                        type="text"
+                        value={currentOpt.headline}
+                        onChange={(e) => updateActivePerspective({ headline: e.target.value })}
+                        className="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block font-bold text-slate-700 mb-1">Highlighted Keyword/Text</label>
+                      <input
+                        type="text"
+                        value={currentOpt.highlightText || ''}
+                        onChange={(e) => updateActivePerspective({ highlightText: e.target.value })}
+                        className="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold text-teal-700"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block font-bold text-slate-700 mb-1">Perspective Subheadline</label>
+                      <textarea
+                        rows={2}
+                        value={currentOpt.subheadline}
+                        onChange={(e) => updateActivePerspective({ subheadline: e.target.value })}
+                        className="w-full p-2 bg-white border border-slate-300 rounded-lg leading-relaxed"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Primary CTA Button</label>
+                      <input
+                        type="text"
+                        value={currentOpt.primaryCta}
+                        onChange={(e) => updateActivePerspective({ primaryCta: e.target.value })}
+                        className="w-full p-2 bg-white border border-slate-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Secondary CTA Button</label>
+                      <input
+                        type="text"
+                        value={currentOpt.secondaryCta}
+                        onChange={(e) => updateActivePerspective({ secondaryCta: e.target.value })}
+                        className="w-full p-2 bg-white border border-slate-300 rounded-lg"
+                      />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                    <div>
-                      <label className="block text-[11px] text-slate-500 font-semibold">Title</label>
-                      <input
-                        type="text"
-                        value={slide.title}
-                        onChange={(e) => {
-                          const updated = [...hero.secondarySlides];
-                          updated[idx].title = e.target.value;
-                          setHero({ ...hero, secondarySlides: updated });
+                  {/* Highlight Pills */}
+                  <div className="pt-3 border-t border-slate-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="font-bold text-slate-700 flex items-center gap-1">
+                        <Tag className="w-3.5 h-3.5 text-teal-600" />
+                        <span>Feature Highlight Pills ({(currentOpt.highlightPills || []).length})</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedPills = [...(currentOpt.highlightPills || []), 'New Feature Benefit'];
+                          updateActivePerspective({ highlightPills: updatedPills });
                         }}
-                        className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
-                      />
+                        className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-teal-700 cursor-pointer flex items-center gap-1"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Add Pill</span>
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-[11px] text-slate-500 font-semibold">Badge</label>
-                      <input
-                        type="text"
-                        value={slide.badge}
-                        onChange={(e) => {
-                          const updated = [...hero.secondarySlides];
-                          updated[idx].badge = e.target.value;
-                          setHero({ ...hero, secondarySlides: updated });
-                        }}
-                        className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] text-slate-500 font-semibold">Metric</label>
-                      <input
-                        type="text"
-                        value={slide.metric}
-                        onChange={(e) => {
-                          const updated = [...hero.secondarySlides];
-                          updated[idx].metric = e.target.value;
-                          setHero({ ...hero, secondarySlides: updated });
-                        }}
-                        className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-teal-700"
-                      />
-                    </div>
-                    <div className="sm:col-span-3">
-                      <label className="block text-[11px] text-slate-500 font-semibold">Subtitle</label>
-                      <input
-                        type="text"
-                        value={slide.subtitle}
-                        onChange={(e) => {
-                          const updated = [...hero.secondarySlides];
-                          updated[idx].subtitle = e.target.value;
-                          setHero({ ...hero, secondarySlides: updated });
-                        }}
-                        className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
-                      />
+
+                    <div className="flex flex-wrap gap-2">
+                      {(currentOpt.highlightPills || []).map((pill, pIdx) => (
+                        <div key={pIdx} className="flex items-center bg-white border border-slate-300 rounded-lg px-2 py-1 gap-1.5 shadow-2xs">
+                          <input
+                            type="text"
+                            value={pill}
+                            onChange={(e) => {
+                              const copy = [...currentOpt.highlightPills];
+                              copy[pIdx] = e.target.value;
+                              updateActivePerspective({ highlightPills: copy });
+                            }}
+                            className="text-xs bg-transparent border-none focus:outline-none w-36 font-medium text-slate-800"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const copy = currentOpt.highlightPills.filter((_, i) => i !== pIdx);
+                              updateActivePerspective({ highlightPills: copy });
+                            }}
+                            className="text-slate-400 hover:text-rose-600 cursor-pointer"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })()}
+          </div>
+
+          {/* 4. Practice Operations Desk Card Editor */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 pb-3 border-b border-slate-200">
+              <Activity className="w-4 h-4 text-[#16A6A3]" />
+              <span>4. Practice Operations Desk &amp; Real-Time Activity Card</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Clinic Name</label>
+                <input
+                  type="text"
+                  value={hero.opsCardTitle || 'Apex Dental Specialists'}
+                  onChange={(e) => setHero({ ...hero, opsCardTitle: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">City / Location</label>
+                <input
+                  type="text"
+                  value={hero.opsCardLocation || 'Indiranagar, Bengaluru'}
+                  onChange={(e) => setHero({ ...hero, opsCardLocation: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">PMS Software &amp; Status</label>
+                <input
+                  type="text"
+                  value={hero.opsCardPms || 'Practo Ray & Encrypted Sync'}
+                  onChange={(e) => setHero({ ...hero, opsCardPms: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Status Badge</label>
+                <input
+                  type="text"
+                  value={hero.opsCardBadge || 'Active Batch Clean'}
+                  onChange={(e) => setHero({ ...hero, opsCardBadge: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-emerald-700"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Claims Today</label>
+                <input
+                  type="text"
+                  value={hero.opsCardClaimsProcessedToday || '38 Claims'}
+                  onChange={(e) => setHero({ ...hero, opsCardClaimsProcessedToday: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Amount Processed Today</label>
+                <input
+                  type="text"
+                  value={hero.opsCardAmountProcessedToday || '₹3,42,800 Processed'}
+                  onChange={(e) => setHero({ ...hero, opsCardAmountProcessedToday: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-teal-700"
+                />
+              </div>
+            </div>
+
+            {/* Recent Activity Log Items */}
+            <div className="pt-3 border-t border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-slate-800 text-xs">
+                  Recent Activity Log Items ({(hero.opsRecentActivity || []).length})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newLog = {
+                      label: 'Cashless Dental Claim Verified',
+                      amountOrBadge: '+₹35,000',
+                    };
+                    const updated = [...(hero.opsRecentActivity || []), newLog];
+                    setHero({ ...hero, opsRecentActivity: updated });
+                  }}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Log Item</span>
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {(hero.opsRecentActivity || []).map((log, lIdx) => (
+                  <div key={lIdx} className="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                    <input
+                      type="text"
+                      value={log.label}
+                      onChange={(e) => {
+                        const copy = [...hero.opsRecentActivity!];
+                        copy[lIdx].label = e.target.value;
+                        setHero({ ...hero, opsRecentActivity: copy });
+                      }}
+                      className="flex-1 p-1.5 bg-white border border-slate-300 rounded-lg text-xs"
+                      placeholder="Activity description"
+                    />
+                    <input
+                      type="text"
+                      value={log.amountOrBadge}
+                      onChange={(e) => {
+                        const copy = [...hero.opsRecentActivity!];
+                        copy[lIdx].amountOrBadge = e.target.value;
+                        setHero({ ...hero, opsRecentActivity: copy });
+                      }}
+                      className="w-32 p-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-teal-700"
+                      placeholder="+₹42,500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const filtered = hero.opsRecentActivity!.filter((_, i) => i !== lIdx);
+                        setHero({ ...hero, opsRecentActivity: filtered });
+                      }}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Key Numerical Stats Strip */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 pb-3 border-b border-slate-200">
+              <BarChart3 className="w-4 h-4 text-[#16A6A3]" />
+              <span>5. High-Impact Performance Metrics (3 Counters)</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <span className="font-bold text-slate-500 text-[11px] block">Stat #1</span>
+                <div>
+                  <label className="block text-[10px] text-slate-500 font-bold">Metric Value</label>
+                  <input
+                    type="text"
+                    value={hero.stat1Value || ''}
+                    onChange={(e) => setHero({ ...hero, stat1Value: e.target.value })}
+                    className="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold text-teal-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-500 font-bold">Metric Label</label>
+                  <input
+                    type="text"
+                    value={hero.stat1Label || ''}
+                    onChange={(e) => setHero({ ...hero, stat1Label: e.target.value })}
+                    className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <span className="font-bold text-slate-500 text-[11px] block">Stat #2</span>
+                <div>
+                  <label className="block text-[10px] text-slate-500 font-bold">Metric Value</label>
+                  <input
+                    type="text"
+                    value={hero.stat2Value || ''}
+                    onChange={(e) => setHero({ ...hero, stat2Value: e.target.value })}
+                    className="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold text-teal-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-500 font-bold">Metric Label</label>
+                  <input
+                    type="text"
+                    value={hero.stat2Label || ''}
+                    onChange={(e) => setHero({ ...hero, stat2Label: e.target.value })}
+                    className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <span className="font-bold text-slate-500 text-[11px] block">Stat #3</span>
+                <div>
+                  <label className="block text-[10px] text-slate-500 font-bold">Metric Value</label>
+                  <input
+                    type="text"
+                    value={hero.stat3Value || ''}
+                    onChange={(e) => setHero({ ...hero, stat3Value: e.target.value })}
+                    className="w-full p-2 bg-white border border-slate-300 rounded-lg font-bold text-teal-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-500 font-bold">Metric Label</label>
+                  <input
+                    type="text"
+                    value={hero.stat3Label || ''}
+                    onChange={(e) => setHero({ ...hero, stat3Label: e.target.value })}
+                    className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -13,6 +13,8 @@ import {
   Building,
   UserCheck,
   Clock,
+  Play,
+  Video,
 } from 'lucide-react';
 
 interface HeroSectionProps {
@@ -28,16 +30,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   const { cmsData } = useCms();
   const [perspective, setPerspective] = useState<HeroPerspective>('elite');
-  const fallbackCopy = HERO_OPTIONS[perspective];
 
-  // If perspective is elite (default), use the live editable CMS hero data!
-  const headline = perspective === 'elite' ? cmsData.hero.headline : fallbackCopy.headline;
-  const highlightText = perspective === 'elite' ? cmsData.hero.highlightText : '';
-  const subheadline = perspective === 'elite' ? cmsData.hero.subheadline : fallbackCopy.subheadline;
-  const badge = perspective === 'elite' ? cmsData.hero.badge : fallbackCopy.badge;
-  const primaryCta = perspective === 'elite' ? cmsData.hero.primaryCtaText : fallbackCopy.primaryCta;
-  const secondaryCta = perspective === 'elite' ? cmsData.hero.secondaryCtaText : fallbackCopy.secondaryCta;
+  // Load perspective configuration from CMS or fallback
+  const customPerspectiveConfig = cmsData.hero.perspectives?.[perspective];
+  const fallbackCopy = HERO_OPTIONS[perspective] || HERO_OPTIONS.elite;
+
+  const headline = customPerspectiveConfig?.headline || (perspective === 'elite' ? cmsData.hero.headline : fallbackCopy.headline);
+  const highlightText = customPerspectiveConfig?.highlightText !== undefined 
+    ? customPerspectiveConfig.highlightText 
+    : (perspective === 'elite' ? cmsData.hero.highlightText : '');
+  const subheadline = customPerspectiveConfig?.subheadline || (perspective === 'elite' ? cmsData.hero.subheadline : fallbackCopy.subheadline);
+  const badge = customPerspectiveConfig?.badge || (perspective === 'elite' ? cmsData.hero.badge : fallbackCopy.badge);
+  const primaryCta = customPerspectiveConfig?.primaryCta || (perspective === 'elite' ? cmsData.hero.primaryCtaText : fallbackCopy.primaryCta);
+  const secondaryCta = customPerspectiveConfig?.secondaryCta || (perspective === 'elite' ? cmsData.hero.secondaryCtaText : fallbackCopy.secondaryCta);
+  const highlightPills = customPerspectiveConfig?.highlightPills || fallbackCopy.highlightPills || [];
+
   const heroImage = cmsData.hero.heroImage || "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=1000&q=80";
+  const mediaType = cmsData.hero.mediaType || 'image';
+  const videoUrl = cmsData.hero.videoUrl || '';
 
   const handleSecondaryAction = () => {
     if (perspective === 'growth') {
@@ -47,44 +57,71 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     }
   };
 
+  // Helper to detect youtube/vimeo embed
+  const getEmbedVideoUrl = (url: string) => {
+    if (!url) return '';
+    if (url.includes('youtube.com/watch?v=')) {
+      const videoId = url.split('v=')[1]?.split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
+    }
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
+    }
+    if (url.includes('vimeo.com/')) {
+      const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+    return url;
+  };
+
+  const isIframeVideo = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') || videoUrl.includes('vimeo.com');
+
+  const tabLabelElite = cmsData.hero.perspectives?.elite?.tabLabel || 'Elite Standard';
+  const tabLabelStress = cmsData.hero.perspectives?.['stress-free']?.tabLabel || 'Stress-Free Clinic';
+  const tabLabelGrowth = cmsData.hero.perspectives?.growth?.tabLabel || 'Financial ROI';
+
   return (
     <section className="relative overflow-hidden bg-[#F8FAFB] pt-6 pb-12 sm:pt-10 sm:pb-20 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Practice Strategy Filter Tabs */}
+        {/* Practice Strategy Filter Tabs (Editable Patient Viewpoint) */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-8 bg-white p-1.5 sm:p-2 rounded-xl border border-slate-200 shadow-xs max-w-xl mx-auto lg:mx-0">
           <span className="text-xs font-bold text-slate-500 px-3 hidden sm:inline">
-            Practice Viewpoint:
+            {cmsData.hero.viewpointTitle || 'Practice Viewpoint:'}
           </span>
           <div className="grid grid-cols-3 gap-1.5 w-full sm:w-auto flex-1">
             <button
               onClick={() => setPerspective('elite')}
-              className={`py-1.5 px-2.5 text-xs font-bold rounded-lg transition-colors cursor-pointer text-center ${
+              className={`py-1.5 px-2.5 text-xs font-bold rounded-lg transition-colors cursor-pointer text-center truncate ${
                 perspective === 'elite'
-                  ? 'bg-[#12304A] text-white'
+                  ? 'bg-[#12304A] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
+              title={tabLabelElite}
             >
-              Custom CMS View
+              {tabLabelElite}
             </button>
             <button
               onClick={() => setPerspective('stress-free')}
-              className={`py-1.5 px-2.5 text-xs font-bold rounded-lg transition-colors cursor-pointer text-center ${
+              className={`py-1.5 px-2.5 text-xs font-bold rounded-lg transition-colors cursor-pointer text-center truncate ${
                 perspective === 'stress-free'
-                  ? 'bg-[#12304A] text-white'
+                  ? 'bg-[#12304A] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
+              title={tabLabelStress}
             >
-              Stress-Free
+              {tabLabelStress}
             </button>
             <button
               onClick={() => setPerspective('growth')}
-              className={`py-1.5 px-2.5 text-xs font-bold rounded-lg transition-colors cursor-pointer text-center ${
+              className={`py-1.5 px-2.5 text-xs font-bold rounded-lg transition-colors cursor-pointer text-center truncate ${
                 perspective === 'growth'
-                  ? 'bg-[#12304A] text-white'
+                  ? 'bg-[#12304A] text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
+              title={tabLabelGrowth}
             >
-              Financial ROI
+              {tabLabelGrowth}
             </button>
           </div>
         </div>
@@ -115,7 +152,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
               <button
                 onClick={onOpenAuditModal}
                 className="px-6 py-3.5 text-sm font-bold text-white bg-[#12304A] hover:bg-[#16A6A3] rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-center gap-2.5 group"
@@ -131,6 +168,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <span>{secondaryCta}</span>
               </button>
             </div>
+
+            {/* Optional Perspective Highlight Pills */}
+            {highlightPills && highlightPills.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mb-6">
+                {highlightPills.map((pill, pIdx) => (
+                  <span
+                    key={pIdx}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-teal-50 border border-teal-200 text-[#12304A] text-xs font-semibold"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#16A6A3]" />
+                    <span>{pill}</span>
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* 3 Value Indicators */}
             <div className="pt-5 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -148,23 +200,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </div>
             </div>
 
-            {/* Real Doctor Practice Validation Strip */}
+            {/* Real Practice Validation Strip */}
             <div className="mt-6 flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200/90 text-xs text-slate-600 max-w-lg shadow-xs">
               <div className="w-9 h-9 rounded-full bg-teal-50 border border-teal-200 flex items-center justify-center text-[#16A6A3] flex-shrink-0 font-bold">
                 <UserCheck className="w-5 h-5" />
               </div>
               <div className="leading-snug">
                 <span className="font-bold text-[#12304A] block">
-                  Trusted by 240+ Solo &amp; Group Dental Practices
+                  {cmsData.hero.trustStripTitle || 'Trusted by 240+ Solo & Multispecialty Dental Clinics'}
                 </span>
                 <span className="text-[11px] text-slate-500">
-                  Over $180M in annual dental claims processed across all 50 US states.
+                  {cmsData.hero.trustStripSubtitle || 'Over ₹180M+ in dental claims & practice revenue managed across India.'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Realistic Practice Operations Desk */}
+          {/* Right Column: Practice Operations Desk (Supports Video & Image) */}
           <div className="lg:col-span-5 w-full">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
               {/* App-like Top Header */}
@@ -175,10 +227,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   </div>
                   <div>
                     <span className="text-xs font-bold text-white block leading-tight">
-                      Vance Family Dental &bull; Dallas, TX
+                      {cmsData.hero.opsCardTitle || 'Apex Dental Specialists'} &bull; {cmsData.hero.opsCardLocation || 'Bengaluru'}
                     </span>
                     <span className="text-[10px] text-slate-300">
-                      Dentrix G7 &bull; HIPAA Remote VPN Sync
+                      {cmsData.hero.opsCardPms || 'Practo Ray & Encrypted Sync'}
                     </span>
                   </div>
                 </div>
@@ -187,27 +239,51 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 </span>
               </div>
 
-              {/* Practice Image Banner */}
-              <div className="relative h-36 sm:h-44 w-full bg-slate-100 overflow-hidden border-b border-slate-200">
-                <img
-                  src={heroImage}
-                  alt="Modern Dental Practice Front Desk and Claims Management"
-                  className="w-full h-full object-cover object-center"
-                  loading="eager"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#12304A]/70 via-transparent to-transparent"></div>
-                <div className="absolute bottom-2.5 left-3.5 text-white">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-teal-300 block">
-                    Live Practice Operations
-                  </span>
-                  <span className="text-xs font-bold text-white drop-shadow-sm">
-                    Today&apos;s Claims &amp; Collections Snapshot
-                  </span>
-                </div>
-                <div className="absolute top-2.5 right-3 bg-[#12304A]/80 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  Active Batch Clean
-                </div>
+              {/* Media Container (Video or Image) */}
+              <div className="relative h-44 sm:h-52 w-full bg-slate-900 overflow-hidden border-b border-slate-200">
+                {mediaType === 'video' && videoUrl ? (
+                  isIframeVideo ? (
+                    <iframe
+                      src={getEmbedVideoUrl(videoUrl)}
+                      title="Practice Operations Video"
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      controls
+                      playsInline
+                      poster={cmsData.hero.videoPoster || heroImage}
+                      className="w-full h-full object-cover"
+                    >
+                      <source src={videoUrl} type="video/mp4" />
+                      Your browser does not support HTML5 video.
+                    </video>
+                  )
+                ) : (
+                  <>
+                    <img
+                      src={heroImage}
+                      alt="Modern Dental Practice Front Desk and Claims Management"
+                      className="w-full h-full object-cover object-center"
+                      loading="eager"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#12304A]/80 via-transparent to-transparent"></div>
+                    <div className="absolute bottom-2.5 left-3.5 text-white">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-teal-300 block">
+                        Live Practice Operations
+                      </span>
+                      <span className="text-xs font-bold text-white drop-shadow-sm">
+                        Daily Claims &amp; Collections Snapshot
+                      </span>
+                    </div>
+                    <div className="absolute top-2.5 right-3 bg-[#12304A]/80 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-bold text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      {cmsData.hero.opsCardBadge || 'Active Batch Clean'}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Performance Metrics Grid */}
@@ -219,10 +295,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                       <FileCheck className="w-3.5 h-3.5 text-[#16A6A3]" />
                     </div>
                     <div className="text-lg sm:text-xl font-extrabold text-[#12304A]">
-                      38 Claims
+                      {cmsData.hero.opsCardClaimsProcessedToday || '38 Claims'}
                     </div>
                     <span className="text-[11px] font-bold text-emerald-700">
-                      $34,280 Processed
+                      {cmsData.hero.opsCardAmountProcessedToday || '₹3,42,800 Processed'}
                     </span>
                   </div>
 
@@ -254,7 +330,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
                     <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                      <span>Pre-Verifications</span>
+                      <span>Reconciliation Speed</span>
                       <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
                     </div>
                     <div className="text-lg sm:text-xl font-extrabold text-[#12304A]">
@@ -275,18 +351,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     </span>
                   </div>
                   <div className="space-y-1.5 text-[11px] text-slate-600">
-                    <div className="flex items-center justify-between border-b border-slate-200/60 pb-1">
-                      <span className="truncate">✓ Delta Dental EFT Posted (Crowns #14, #19)</span>
-                      <span className="font-bold text-emerald-700 ml-2">+$2,840</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-200/60 pb-1">
-                      <span className="truncate">✓ MetLife Appeal Overturned (Perio D4341)</span>
-                      <span className="font-bold text-emerald-700 ml-2">+$1,450</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="truncate">✓ Tomorrow Hygiene Schedule Breakdown (18 Patients)</span>
-                      <span className="font-bold text-[#16A6A3] ml-2">Verified</span>
-                    </div>
+                    {(cmsData.hero.opsRecentActivity && cmsData.hero.opsRecentActivity.length > 0) ? (
+                      cmsData.hero.opsRecentActivity.map((act, actIdx) => (
+                        <div key={actIdx} className="flex items-center justify-between border-b border-slate-200/60 last:border-b-0 pb-1 last:pb-0">
+                          <span className="truncate">✓ {act.label}</span>
+                          <span className="font-bold text-emerald-700 ml-2 whitespace-nowrap">{act.amountOrBadge}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between border-b border-slate-200/60 pb-1">
+                          <span className="truncate">✓ Corporate Health Claim Settled (Crowns #14, #19)</span>
+                          <span className="font-bold text-emerald-700 ml-2">+₹28,400</span>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-slate-200/60 pb-1">
+                          <span className="truncate">✓ Insurance Query Appeal Cleared (Implant Surgery)</span>
+                          <span className="font-bold text-emerald-700 ml-2">+₹45,000</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="truncate">✓ Tomorrow Hygiene Schedule Breakdown (18 Patients)</span>
+                          <span className="font-bold text-[#16A6A3] ml-2">Verified</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 

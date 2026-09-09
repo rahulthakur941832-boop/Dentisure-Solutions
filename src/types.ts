@@ -34,12 +34,43 @@ export interface SeoConfig {
   robots: string;
 }
 
+export interface HeaderNavItem {
+  id: string;
+  label: string;
+  page: NavigationPage | string;
+  href?: string;
+  isExternal?: boolean;
+  enabled: boolean;
+  order: number;
+}
+
 export interface HeaderCmsConfig {
+  showTopBar: boolean;
   topNotice: string;
-  topNoticeBadge: string;
+  topNoticeBadge?: string;
   phoneLabel: string;
   auditButtonText: string;
-  portalLinkText: string;
+  showAuditButton?: boolean;
+  portalLinkText?: string;
+  tickerMessages?: string[];
+  navItems: HeaderNavItem[];
+}
+
+export interface HeroPerspectiveOption {
+  id: HeroPerspective;
+  tabLabel: string;
+  badge: string;
+  headline: string;
+  highlightText?: string;
+  subheadline: string;
+  primaryCta: string;
+  secondaryCta: string;
+  highlightPills: string[];
+}
+
+export interface HeroOpsActivityItem {
+  label: string;
+  amountOrBadge: string;
 }
 
 export interface HeroCmsConfig {
@@ -51,6 +82,9 @@ export interface HeroCmsConfig {
   secondaryCtaText: string;
   phoneNotice: string;
   heroImage: string;
+  mediaType?: 'image' | 'video';
+  videoUrl?: string;
+  videoPoster?: string;
   stat1Value: string;
   stat1Label: string;
   stat2Value: string;
@@ -58,6 +92,19 @@ export interface HeroCmsConfig {
   stat3Value: string;
   stat3Label: string;
   trustCardBadge: string;
+  trustStripTitle?: string;
+  trustStripSubtitle?: string;
+  // Patient Viewpoint / Perspective Options (3 editable options)
+  viewpointTitle?: string;
+  perspectives?: Record<HeroPerspective, HeroPerspectiveOption>;
+  // Live Operations Desk Card
+  opsCardTitle?: string;
+  opsCardLocation?: string;
+  opsCardPms?: string;
+  opsCardBadge?: string;
+  opsCardClaimsProcessedToday?: string;
+  opsCardAmountProcessedToday?: string;
+  opsRecentActivity?: HeroOpsActivityItem[];
 }
 
 export interface SecondarySliderItem {
@@ -65,6 +112,7 @@ export interface SecondarySliderItem {
   category: string;
   title: string;
   desc: string;
+  iconName?: string;
 }
 
 export interface TrustMetricItem {
@@ -181,7 +229,16 @@ export interface CmsData {
     aboutText: string;
     disclaimer: string;
     copyright: string;
+    agencyCredit?: string;
     pmsList: string[];
+  };
+  branding?: {
+    googleDriveLogoUrl?: string;
+    googleDriveFaviconUrl?: string;
+    customLogoUrl?: string;
+    customFaviconUrl?: string;
+    agencyCredit?: string;
+    showLogoImage?: boolean;
   };
   aboutPage: {
     heroTitle: string;
