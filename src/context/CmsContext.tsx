@@ -70,7 +70,7 @@ interface CmsContextType {
   resetHeaderNavItems: () => void;
 
   // Server & Multi-browser Persistence
-  saveToServer: (dataToSave?: CmsData) => Promise<{ success: boolean; error?: string }>;
+  saveToServer: (dataToSave?: CmsData) => Promise<{ success: boolean; error?: string; provider?: string }>;
   isSyncingServer: boolean;
 
   // UI Modal control
@@ -167,59 +167,61 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const isInitialMount = React.useRef(true);
   const serverLoadedRef = React.useRef(false);
 
-  // Fetch authoritative server CMS data on mount so ALL browsers & incognito tabs see identical live data!
+  // Fetch authoritative server/cloud CMS data on mount so ALL browsers & incognito tabs see identical live data!
   useEffect(() => {
     let isMounted = true;
     async function loadAuthoritativeServerCms() {
       try {
-        const response = await fetch('/api/cms');
+        // Cache-busting timestamp + headers guarantee fresh cloud data in Incognito & new devices
+        const response = await fetch(`/api/cms?t=${Date.now()}`, {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        });
         if (response.ok) {
           const json = await response.json();
           if (json?.data && isMounted) {
             const serverData = json.data;
             serverLoadedRef.current = true;
-            console.log('[CMS Context] Loaded authoritative server CMS. Updating frontend state.');
-            setCmsData((prev) => {
+            console.log('[CMS Context] Loaded authoritative cloud CMS data from provider:', json.provider);
+            
+            // Server data from Cloud Database is the SINGLE SOURCE OF TRUTH
+            setCmsData(() => {
               const merged: CmsData = {
                 ...INITIAL_CMS_DATA,
-                ...prev,
                 ...serverData,
                 header: {
                   ...INITIAL_CMS_DATA.header,
-                  ...(prev?.header || {}),
                   ...(serverData?.header || {}),
                   logoUrl:
                     serverData?.header?.logoUrl !== undefined
                       ? serverData.header.logoUrl
-                      : serverData?.branding?.headerLogoUrl || prev?.header?.logoUrl || '',
+                      : serverData?.branding?.headerLogoUrl || '',
                   logoHeight:
                     serverData?.header?.logoHeight ||
                     serverData?.branding?.headerLogoHeight ||
-                    prev?.header?.logoHeight ||
                     44,
                 },
                 footer: {
                   ...INITIAL_CMS_DATA.footer,
-                  ...(prev?.footer || {}),
                   ...(serverData?.footer || {}),
                   logoUrl:
                     serverData?.footer?.logoUrl !== undefined
                       ? serverData.footer.logoUrl
-                      : serverData?.branding?.footerLogoUrl || prev?.footer?.logoUrl || '',
+                      : serverData?.branding?.footerLogoUrl || '',
                   logoHeight:
                     serverData?.footer?.logoHeight ||
                     serverData?.branding?.footerLogoHeight ||
-                    prev?.footer?.logoHeight ||
                     40,
                 },
                 branding: {
                   ...INITIAL_CMS_DATA.branding,
-                  ...(prev?.branding || {}),
                   ...(serverData?.branding || {}),
                   headerLogoUrl:
-                    serverData?.branding?.headerLogoUrl || serverData?.header?.logoUrl || prev?.branding?.headerLogoUrl || '',
+                    serverData?.branding?.headerLogoUrl || serverData?.header?.logoUrl || '',
                   footerLogoUrl:
-                    serverData?.branding?.footerLogoUrl || serverData?.footer?.logoUrl || prev?.branding?.footerLogoUrl || '',
+                    serverData?.branding?.footerLogoUrl || serverData?.footer?.logoUrl || '',
                 },
               };
               try {
@@ -232,7 +234,7 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           }
         }
       } catch (err) {
-        console.warn('[CMS Context] Could not reach /api/cms, continuing with local data:', err);
+        console.warn('[CMS Context] Could not reach /api/cms, continuing with local cache:', err);
         serverLoadedRef.current = true;
       }
     }
@@ -280,29 +282,36 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return () => clearTimeout(timer);
   }, [cmsData]);
 
-  // Save explicitly to authoritative server storage (file + memory)
-  const saveToServer = async (dataToSave?: CmsData): Promise<{ success: boolean; error?: string }> => {
+  // Save explicitly to authoritative Cloud Database storage
+  const saveToServer = async (
+    dataToSave?: CmsData
+  ): Promise<{ success: boolean; error?: string; provider?: string }> => {
     const payload = dataToSave || cmsData;
     setIsSyncingServer(true);
     try {
       const res = await fetch('/api/cms', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
         body: JSON.stringify({ data: payload }),
       });
-      if (res.ok) {
-        const json = await res.json();
-        console.log('[CMS Context] Saved to server storage successfully:', json);
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.success !== false) {
+        console.log('[CMS Context] Saved to cloud database successfully:', json);
         try {
           localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(payload));
         } catch (_) {}
-        return { success: true };
+        return { success: true, provider: json.provider };
       } else {
-        const errJson = await res.json().catch(() => ({}));
-        return { success: false, error: errJson.error || 'Server returned an error status' };
+        return {
+          success: false,
+          error: json.error || json.message || 'Server returned an error status',
+        };
       }
     } catch (err: any) {
-      console.error('[CMS Context] Network error saving to server:', err);
+      console.error('[CMS Context] Network error saving to cloud database:', err);
       return { success: false, error: err.message || 'Network error' };
     } finally {
       setIsSyncingServer(false);

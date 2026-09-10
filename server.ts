@@ -4,6 +4,13 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
+import {
+  getCloudCms,
+  saveCloudCms,
+  resetCloudCms,
+  uploadCloudAsset,
+  getCloudStatus,
+} from './server/cloudCms.ts';
 
 dotenv.config();
 
@@ -127,68 +134,63 @@ if (fs.existsSync(cmsFilePath)) {
   }
 }
 
-// Authoritative Server CMS Endpoints (accessible across incognito, other browsers, devices)
-app.get('/api/cms', (req, res) => {
+// Cloud Integration Status
+app.get('/api/status', (req, res) => {
   res.json({
-    success: true,
-    data: serverCmsData,
+    status: 'ok',
+    service: 'DentiSure Cloud CMS & Storage',
+    ...getCloudStatus(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Authoritative Server CMS Endpoints (backed by Supabase / Cloud Database)
+app.get('/api/cms', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  const result = await getCloudCms();
+  res.json({
+    success: result.success,
+    data: result.data,
+    provider: result.provider,
+    instructions: result.instructions,
     timestamp: Date.now(),
   });
 });
 
-app.post('/api/cms', (req, res) => {
+app.post('/api/cms', async (req, res) => {
   try {
+    const isReset = req.query?.reset === 'true' || req.body?.reset === true;
+    if (isReset) {
+      const resetResult = await resetCloudCms();
+      res.json(resetResult);
+      return;
+    }
+
     const incoming = req.body?.data || req.body;
     if (!incoming || typeof incoming !== 'object') {
       res.status(400).json({ error: 'Invalid CMS payload' });
       return;
     }
 
-    serverCmsData = incoming;
-
-    // Write to /data/cms-content.json
-    fs.writeFileSync(cmsFilePath, JSON.stringify(serverCmsData, null, 2), 'utf8');
-
-    // Also mirror to /dist/data if dist exists
-    const distDataDir = path.join(process.cwd(), 'dist', 'data');
-    if (fs.existsSync(path.join(process.cwd(), 'dist'))) {
-      if (!fs.existsSync(distDataDir)) {
-        fs.mkdirSync(distDataDir, { recursive: true });
-      }
-      fs.writeFileSync(path.join(distDataDir, 'cms-content.json'), JSON.stringify(serverCmsData, null, 2), 'utf8');
-    }
-
-    console.log(
-      `[Server CMS] Saved CMS data to server. Header Logo: "${serverCmsData?.header?.logoUrl || ''}", Footer Logo: "${serverCmsData?.footer?.logoUrl || ''}"`
-    );
-
-    res.json({
-      success: true,
-      message: 'CMS data successfully saved to server storage',
-      data: serverCmsData,
-    });
+    const saveResult = await saveCloudCms(incoming);
+    res.status(saveResult.success ? 200 : 500).json(saveResult);
   } catch (err: any) {
     console.error('[Server CMS Error]', err);
-    res.status(500).json({ error: 'Failed to write CMS data to disk: ' + (err.message || 'Unknown error') });
+    res.status(500).json({ error: 'Failed to write CMS data: ' + (err.message || 'Unknown error') });
   }
 });
 
-app.post('/api/cms/reset', (req, res) => {
-  try {
-    serverCmsData = null;
-    if (fs.existsSync(cmsFilePath)) {
-      fs.unlinkSync(cmsFilePath);
-    }
-    res.json({ success: true, message: 'Server CMS reset to defaults' });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
+app.post('/api/cms/reset', async (req, res) => {
+  const resetResult = await resetCloudCms();
+  res.json(resetResult);
 });
 
-// Real Image/File Upload Endpoint
-app.post('/api/upload', (req, res) => {
+// Real Image/File Upload to Cloud CDN (Supabase Storage / Cloudinary / local fallback)
+app.post('/api/upload', async (req, res) => {
   try {
-    const rawData = req.body.image || req.body.data;
+    const rawData = req.body?.image || req.body?.data;
     if (!rawData || typeof rawData !== 'string') {
       res.status(400).json({ error: 'No image data provided' });
       return;
@@ -209,7 +211,7 @@ app.post('/api/upload', (req, res) => {
       else if (detectedMime === 'image/gif') detectedExt = 'gif';
       else if (detectedMime === 'image/x-icon' || detectedMime === 'image/vnd.microsoft.icon') detectedExt = 'ico';
       else if (detectedMime === 'image/png') detectedExt = 'png';
-    } else if (req.body.filename) {
+    } else if (req.body?.filename) {
       const ext = path.extname(req.body.filename).toLowerCase().replace('.', '');
       if (['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif', 'ico'].includes(ext)) {
         detectedExt = ext === 'jpeg' ? 'jpg' : ext;
@@ -222,34 +224,14 @@ app.post('/api/upload', (req, res) => {
       return;
     }
 
-    const tagPrefix = req.body.tag ? req.body.tag.replace(/[^a-zA-Z0-9_-]/g, '') : 'logo';
-    const uniqueFilename = `${tagPrefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${detectedExt}`;
+    const tag = req.body?.tag || 'logo';
+    const filename = req.body?.filename || `upload.${detectedExt}`;
 
-    const uploadPath = path.join(process.cwd(), 'public', 'uploads', uniqueFilename);
-    fs.writeFileSync(uploadPath, buffer);
-
-    // If dist exists, also mirror to dist/uploads for production static serving
-    const distPath = path.join(process.cwd(), 'dist', 'uploads');
-    if (fs.existsSync(path.join(process.cwd(), 'dist'))) {
-      if (!fs.existsSync(distPath)) {
-        fs.mkdirSync(distPath, { recursive: true });
-      }
-      fs.writeFileSync(path.join(distPath, uniqueFilename), buffer);
-    }
-
-    const fileUrl = `/uploads/${uniqueFilename}`;
-    console.log(`[Upload API] Saved ${uniqueFilename} (${buffer.length} bytes) -> ${fileUrl}`);
-
-    res.json({
-      success: true,
-      url: fileUrl,
-      filename: uniqueFilename,
-      size: buffer.length,
-      mimeType: detectedMime,
-    });
+    const uploadResult = await uploadCloudAsset(buffer, filename, detectedMime, tag);
+    res.status(uploadResult.success ? 200 : 500).json(uploadResult);
   } catch (err: any) {
     console.error('[Upload API Error]', err);
-    res.status(500).json({ error: 'Failed to save uploaded image: ' + (err.message || 'Unknown error') });
+    res.status(500).json({ error: 'Failed to upload image: ' + (err.message || 'Unknown error') });
   }
 });
 

@@ -64,10 +64,48 @@ export const AdminPanel: React.FC = () => {
     updateBlogPost,
     deleteBlogPost,
     updateLegalDoc,
+    saveToServer,
+    isSyncingServer,
   } = useCms();
 
   const [activeTab, setActiveTab] = useState<AdminTab>('leads');
   const [saveToast, setSaveToast] = useState<string>('');
+  const [cloudStatus, setCloudStatus] = useState<any>(null);
+  const [isCheckingCloud, setIsCheckingCloud] = useState<boolean>(false);
+
+  // Check cloud connection status
+  const checkCloudHealth = async () => {
+    setIsCheckingCloud(true);
+    try {
+      const res = await fetch('/api/status');
+      if (res.ok) {
+        const data = await res.json();
+        setCloudStatus(data);
+      }
+    } catch (_) {
+    } finally {
+      setIsCheckingCloud(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (isAdminPanelOpen) {
+      checkCloudHealth();
+    }
+  }, [isAdminPanelOpen]);
+
+  const handleSaveAllToCloud = async () => {
+    const res = await saveToServer();
+    if (res.success) {
+      showSavedToast(
+        res.provider === 'supabase'
+          ? 'Saved live to Supabase Cloud Database!'
+          : 'Saved live across all browsers & cloud!'
+      );
+    } else {
+      alert('Error saving to cloud database: ' + (res.error || 'Unknown error'));
+    }
+  };
 
   // Leads filter states
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
@@ -221,6 +259,20 @@ export const AdminPanel: React.FC = () => {
                 <span>{saveToast}</span>
               </div>
             )}
+
+            <button
+              onClick={handleSaveAllToCloud}
+              disabled={isSyncingServer}
+              title="Save all changes to Cloud Database (Supabase / Live across all devices & browsers)"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#16A6A3] hover:bg-[#138d8a] text-white rounded-lg transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              {isSyncingServer ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Save className="w-3.5 h-3.5" />
+              )}
+              <span>{isSyncingServer ? 'Saving...' : 'Save to Cloud'}</span>
+            </button>
 
             <button
               onClick={exportJsonBackup}
@@ -1439,6 +1491,72 @@ export const AdminPanel: React.FC = () => {
                 </button>
               </div>
 
+              {/* Cloud Database & Storage Status Card (Vercel Serverless) */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <h4 className="text-sm font-bold text-[#12304A] flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-[#16A6A3]" />
+                    <span>Cloud Database &amp; Vercel Serverless Architecture</span>
+                  </h4>
+                  <button
+                    onClick={checkCloudHealth}
+                    disabled={isCheckingCloud}
+                    className="flex items-center gap-1 text-[11px] font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-200 cursor-pointer"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isCheckingCloud ? 'animate-spin' : ''}`} />
+                    <span>Check Status</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      Active Database Engine
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${cloudStatus?.supabaseConfigured ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                      <span className="text-xs font-bold text-[#12304A]">
+                        {cloudStatus?.databaseProvider || 'Checking cloud database...'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      Active Image CDN Storage
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${cloudStatus?.isConfigured ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                      <span className="text-xs font-bold text-[#12304A]">
+                        {cloudStatus?.storageProvider || 'Checking cloud storage...'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-teal-50/60 border border-teal-200/80 rounded-xl text-xs text-teal-900 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-bold flex items-center gap-1.5 text-teal-950">
+                      <Shield className="w-4 h-4 text-teal-600" />
+                      <span>Vercel Permanent Cloud Setup (Free Tier Supabase)</span>
+                    </h5>
+                    <span className="text-[10px] font-mono bg-teal-200/60 text-teal-900 px-2 py-0.5 rounded">
+                      Production Ready
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-teal-800 leading-relaxed">
+                    Vercel is an ephemeral, serverless environment. For changes (like new logos, hero texts, and phone numbers) to persist permanently across all devices and incognito windows on Vercel, connect your free Supabase project by adding these 2 Environment Variables in your Vercel Dashboard:
+                  </p>
+                  <div className="bg-[#12304A] text-teal-200 p-3 rounded-lg font-mono text-[11px] overflow-x-auto select-all">
+                    SUPABASE_URL=https://your-project.supabase.co<br />
+                    SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+                  </div>
+                  <p className="text-[10px] text-teal-700">
+                    SQL snippet to create the table in Supabase SQL Editor: <code className="bg-white/80 px-1 py-0.5 rounded text-[#12304A]">CREATE TABLE cms_content (id TEXT PRIMARY KEY DEFAULT 'default', data JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());</code>
+                  </p>
+                </div>
+              </div>
+
               {/* Backup & Factory Reset Card */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
                 <h4 className="text-sm font-bold text-[#12304A] pb-3 border-b border-slate-100 flex items-center gap-2">
@@ -1517,13 +1635,21 @@ export const AdminPanel: React.FC = () => {
         <div className="bg-white border-t border-slate-200 px-5 py-2.5 flex items-center justify-between text-xs text-slate-500 flex-shrink-0">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              All edits update live in frontend in real time
+              <span className={`w-2 h-2 rounded-full ${cloudStatus?.isConfigured ? 'bg-emerald-500' : 'bg-teal-500'}`}></span>
+              Live Sync: {cloudStatus?.isConfigured ? 'Cloud Database Connected' : 'Auto-Sync Active'}
             </span>
             <span className="hidden sm:inline text-slate-300">|</span>
-            <span className="hidden sm:inline">Storage: LocalStorage Engine (Persistent)</span>
+            <span className="hidden sm:inline">Engine: {cloudStatus?.databaseProvider || 'Universal Cloud / Serverless'}</span>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleSaveAllToCloud}
+              disabled={isSyncingServer}
+              className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg text-xs cursor-pointer transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            >
+              <Save className="w-3 h-3" />
+              <span>{isSyncingServer ? 'Saving...' : 'Save to Cloud'}</span>
+            </button>
             <button
               onClick={closeAdminPanel}
               className="px-3 py-1 bg-[#12304A] hover:bg-[#16A6A3] text-white font-bold rounded-lg text-xs cursor-pointer transition-colors"
