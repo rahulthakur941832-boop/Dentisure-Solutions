@@ -34,248 +34,189 @@ export const Footer: React.FC<FooterProps> = ({
   };
 
   return (
-    <footer className="bg-[#12304A] text-slate-300 pt-16 pb-12 border-t border-slate-700/80">
+    <footer className="w-full bg-[#12304A] text-slate-200 pt-14 pb-12 border-t border-[#001B31]">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        {/* Top Callout Strip */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 sm:p-10 mb-16 flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* Top 4-Column Grid per Stitch Architecture */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+          {/* Column 1: Brand & Contact Info */}
           <div>
-            <span className="text-xs font-extrabold text-teal-300 uppercase tracking-widest block mb-1">
-              Ready for Certainty in Your Dental Revenue?
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Request Your Free, Confidential Practice Revenue Audit Today.
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-2xl">
-              We review your current aging reports, identify uncollected insurance dollars, and give you a clear roadmap to collect what you are owed.
+            <div className="flex items-center gap-3 mb-4">
+              <button
+                onClick={() => handleNav('home')}
+                className="text-left cursor-pointer focus:outline-none"
+              >
+                <Logo variant="white" height={cmsData.footer?.logoHeight || cmsData.branding?.footerLogoHeight || 40} />
+              </button>
+            </div>
+            <p className="font-body-sm text-xs text-slate-300 mb-4 leading-relaxed">
+              {cmsData.footer?.aboutText ||
+                'Pan-India clinical revenue cycle management engineered specifically for dental chains, multi-chair clinics, and private practices across metro and tier-2 hubs.'}
             </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto flex-shrink-0">
-            <button
-              onClick={onOpenBrochureModal}
-              className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
-            >
-              <FileText className="w-4 h-4 text-teal-300" />
-              <span>Digital Brochure</span>
-            </button>
-
-            <button
-              onClick={onOpenAuditModal}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#16A6A3] hover:bg-teal-500 text-white font-bold text-xs sm:text-sm transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2"
-            >
-              <CalendarCheck className="w-4 h-4 text-white" />
-              <span>{cmsData.header.auditButtonText || 'Start Free Audit'}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* 5 Footer Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-14 text-xs">
-          {/* Col 1 & 2: Brand Information */}
-          <div className="lg:col-span-2 space-y-4">
-            <button
-              onClick={() => handleNav('home')}
-              className="text-left cursor-pointer focus:outline-none"
-            >
-              <Logo variant="white" showTagline={true} />
-            </button>
-            <p className="text-slate-300 leading-relaxed text-xs max-w-sm pt-2">
-              {cmsData.footer.aboutText}
-            </p>
-            <div className="flex flex-col space-y-2 text-slate-300 pt-2 text-xs">
-              <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-teal-400" />
-                <span>{cmsData.brand.phone} &bull; Toll-Free Nationwide</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-teal-400" />
-                <span>{cmsData.brand.contactEmail}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-teal-400" />
-                <span>{cmsData.brand.hours}</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <MapPin className="w-3.5 h-3.5 text-teal-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">US Business Address</span>
-                  <span>{cmsData.brand.usBusinessAddress || cmsData.brand.address}</span>
-                </div>
-              </div>
+            <div className="font-body-sm text-xs text-slate-300 space-y-1.5">
+              <p>
+                <strong className="text-white">Registered Office:</strong> Level 4, Brigade Signature Towers, Indiranagar, Bengaluru, Karnataka 560038
+              </p>
+              <p>
+                <strong className="text-white">Direct Phone:</strong>{' '}
+                <a href={`tel:${(cmsData.brand?.phone || '+919876543210').replace(/[^0-9+]/g, '')}`} className="text-[#7EF5F1] hover:underline font-mono">
+                  {cmsData.brand?.phone || '+91 98765 43210'}
+                </a>
+              </p>
+              <p>
+                <strong className="text-white">Email:</strong>{' '}
+                <a href="mailto:advisory@dentisure.com" className="text-[#7EF5F1] hover:underline">
+                  advisory@dentisure.com
+                </a>
+              </p>
             </div>
           </div>
 
-          {/* Col 3: Navigation Pages */}
+          {/* Column 2: RCM Solutions */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-4">
-              Website Pages
+            <h4 className="font-headline-sm text-sm text-white font-bold mb-4 tracking-tight">
+              RCM Solutions
             </h4>
-            <ul className="space-y-2 text-slate-300">
+            <ul className="space-y-2.5 text-xs text-slate-300">
               <li>
                 <button
-                  onClick={() => handleNav('home')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer"
+                  onClick={() => handleNav('solutions')}
+                  className="hover:text-[#7EF5F1] transition-colors cursor-pointer text-left"
                 >
-                  Home Overview
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleNav('about')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer"
-                >
-                  About Us &amp; Leadership
+                  Pre-Visit Insurance Verification
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => handleNav('solutions')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer"
+                  className="hover:text-[#7EF5F1] transition-colors cursor-pointer text-left"
                 >
-                  Solutions &amp; 6-Stage SOP
+                  Daily Ledger Posting &amp; Reconciliation
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('pricing')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer text-teal-300 font-semibold"
+                  onClick={() => handleNav('solutions')}
+                  className="hover:text-[#7EF5F1] transition-colors cursor-pointer text-left"
                 >
-                  Pricing &amp; ROI Calculator
+                  Radiograph Packaging &amp; Pre-Auths
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('blog')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer"
+                  onClick={() => handleNav('solutions')}
+                  className="hover:text-[#7EF5F1] transition-colors cursor-pointer text-left"
                 >
-                  Dental Billing Blog &amp; Guides
+                  30+ Day AR Recovery Squad
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => handleNav('contact')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer"
+                  onClick={() => handleNav('solutions')}
+                  className="hover:text-[#7EF5F1] transition-colors cursor-pointer text-left"
                 >
-                  Contact &amp; Audit Request
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4: Legal & Policies */}
-          <div>
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-4">
-              Legal &amp; Compliance
-            </h4>
-            <ul className="space-y-2 text-slate-300">
-              <li>
-                <button
-                  onClick={() => handleNav('terms')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer text-left"
-                >
-                  Terms of Service &amp; Agreement
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleNav('privacy')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer text-left"
-                >
-                  Privacy Policy &amp; Data Security
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleNav('hipaa')}
-                  className="hover:text-teal-300 transition-colors cursor-pointer text-left font-semibold text-teal-300"
-                >
-                  HIPAA &amp; BAA Statement
+                  Denial Dispute &amp; Resubmission
                 </button>
               </li>
               <li>
                 <button
                   onClick={onOpenBrochureModal}
-                  className="text-amber-300 font-semibold hover:underline cursor-pointer flex items-center gap-1 mt-2"
+                  className="text-amber-300 font-semibold hover:underline cursor-pointer flex items-center gap-1 pt-1"
                 >
-                  <FileText className="w-3 h-3" />
+                  <FileText className="w-3.5 h-3.5" />
                   <span>Download Practice Brochure</span>
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Col 5: Governance & Compliance */}
+          {/* Column 3: Compliance & Security */}
           <div>
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-4">
-              Security &amp; Compliance
+            <h4 className="font-headline-sm text-sm text-white font-bold mb-4 tracking-tight">
+              Compliance &amp; Security
             </h4>
-            <div className="space-y-3">
-              <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs">
-                <span className="font-bold text-teal-300 flex items-center gap-1.5 mb-1">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  HIPAA BAA Enforced
-                </span>
-                <p className="text-[11px] text-slate-400">
-                  Mutual Business Associate Agreements executed prior to onboarding.
-                </p>
-              </div>
+            <ul className="space-y-2.5 text-xs text-slate-300">
+              <li className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#85F8C4] shrink-0" />
+                <span>DPDP Act 2023 Compliant</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#85F8C4] shrink-0" />
+                <span>NABH Documentation Standards</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-[#85F8C4] shrink-0" />
+                <span>256-Bit SSL Remote Tunnels</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#85F8C4] shrink-0" />
+                <span>ISO 27001 Aligned Protocols</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#85F8C4] shrink-0" />
+                <span>Zero Clinical Data Residue</span>
+              </li>
+            </ul>
+          </div>
 
-              <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs">
-                <span className="font-bold text-emerald-400 flex items-center gap-1.5 mb-1">
-                  <Lock className="w-3.5 h-3.5" />
-                  Encrypted VPN Access
-                </span>
-                <p className="text-[11px] text-slate-400">
-                  All claims data remains within your native PMS firewall.
-                </p>
-              </div>
+          {/* Column 4: Supported PMS Sync */}
+          <div>
+            <h4 className="font-headline-sm text-sm text-white font-bold mb-4 tracking-tight">
+              Supported PMS Sync
+            </h4>
+            <div className="grid grid-cols-2 gap-1.5 font-mono text-xs mb-3">
+              <span className="rounded bg-[#001B31] px-2 py-1 text-slate-300 text-center font-medium border border-slate-700/50">Practo Ray</span>
+              <span className="rounded bg-[#001B31] px-2 py-1 text-slate-300 text-center font-medium border border-slate-700/50">Clinicea</span>
+              <span className="rounded bg-[#001B31] px-2 py-1 text-slate-300 text-center font-medium border border-slate-700/50">Dentrix</span>
+              <span className="rounded bg-[#001B31] px-2 py-1 text-slate-300 text-center font-medium border border-slate-700/50">Eaglesoft</span>
+              <span className="rounded bg-[#001B31] px-2 py-1 text-slate-300 text-center font-medium border border-slate-700/50">Open Dental</span>
+              <span className="rounded bg-[#001B31] px-2 py-1 text-slate-300 text-center font-medium border border-slate-700/50">Carestream</span>
+            </div>
+            <div className="p-3 rounded-xl bg-[#001B31] text-slate-300 text-[11px] leading-snug border border-slate-700/60">
+              <p className="font-semibold text-white mb-0.5">Seamless Remote Tunneling</p>
+              Syncs directly with local chairside workstations without interrupting clinical workflows.
             </div>
           </div>
         </div>
 
-        {/* Bottom Disclaimers, Agency Credit, and Copyright */}
-        <div className="pt-8 border-t border-slate-800 text-[11px] text-slate-400 flex flex-col lg:flex-row items-center justify-between gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
-            <span>{cmsData.footer.copyright}</span>
+        {/* Bottom Bar: Copyright, Legal Links, Agency Credit, and CMS Portal Button */}
+        <div className="pt-6 border-t border-slate-700/70 text-xs text-slate-400 flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="text-center lg:text-left">
+            {cmsData.footer?.copyright || '© 2026 DentiSure Solutions Pvt. Ltd. All rights reserved.'}
           </div>
 
-          {/* Agency Credit Badge: ClickIn Digital Marketing Agency (ClickIn DMA) */}
-          <div className="inline-flex items-center gap-2 bg-slate-900/90 border border-teal-500/40 px-3.5 py-1.5 rounded-full shadow-xs text-center">
-            <span className="text-[10.5px] text-slate-400 font-medium">Website Designed &amp; Developed by</span>
-            <span className="text-[11.5px] font-bold text-teal-300 tracking-wide">
-              {cmsData.footer.agencyCredit || 'ClickIn Digital Marketing Agency (ClickIn DMA)'}
-            </span>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 text-slate-400">
-            <button onClick={() => handleNav('terms')} className="hover:text-teal-300 cursor-pointer">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs">
+            <button onClick={() => handleNav('terms')} className="hover:text-[#7EF5F1] transition-colors cursor-pointer">
               Terms of Service
             </button>
-            <span>&bull;</span>
-            <button onClick={() => handleNav('privacy')} className="hover:text-teal-300 cursor-pointer">
+            <span>|</span>
+            <button onClick={() => handleNav('privacy')} className="hover:text-[#7EF5F1] transition-colors cursor-pointer">
               Privacy Policy
             </button>
-            <span>&bull;</span>
-            <button onClick={() => handleNav('hipaa')} className="hover:text-teal-300 cursor-pointer">
-              HIPAA &amp; BAA Compliance
+            <span>|</span>
+            <button onClick={() => handleNav('hipaa')} className="hover:text-[#7EF5F1] transition-colors cursor-pointer">
+              DPDP Compliance
             </button>
-            <span>&bull;</span>
+            <span>|</span>
             <button
               onClick={() => {
                 window.location.hash = '#/admin';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="text-teal-400 hover:text-teal-200 font-semibold cursor-pointer flex items-center gap-1"
+              className="text-[#7EF5F1] hover:text-white font-semibold cursor-pointer flex items-center gap-1"
               title="Open Admin CMS Portal"
             >
               <Lock className="w-3 h-3" />
-              <span>Admin CMS Portal</span>
+              <span>Admin CMS</span>
             </button>
           </div>
-        </div>
 
-        <div className="mt-4 text-[10px] text-slate-400 text-center md:text-left leading-relaxed">
-          {cmsData.footer.disclaimer}
+          {/* Agency Attribution Badge (ClickIn DMA) */}
+          <div className="rounded-full bg-[#001B31] px-4 py-1.5 text-[11px] text-[#7EF5F1] border border-teal-500/30 text-center">
+            <span className="text-slate-400">Website Designed &amp; Developed by</span>{' '}
+            <strong className="text-[#7EF5F1] font-bold">
+              {cmsData.footer?.agencyCredit || 'ClickIn Digital Marketing Agency (ClickIn DMA)'}
+            </strong>
+          </div>
         </div>
       </div>
     </footer>

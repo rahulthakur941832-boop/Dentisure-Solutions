@@ -43,6 +43,8 @@ export const INITIAL_CMS_DATA: CmsData = {
       { id: 'nav-blog', label: 'Blog & Guides', page: 'blog', enabled: true, order: 5 },
       { id: 'nav-contact', label: 'Contact Us', page: 'contact', enabled: true, order: 6 },
     ],
+    logoUrl: '',
+    logoHeight: 44,
   },
 
   topTickerItems: [
@@ -269,9 +271,15 @@ export const INITIAL_CMS_DATA: CmsData = {
       'Eaglesoft Dental',
       'KareXpert & Custom Cloud PMS',
     ],
+    logoUrl: '',
+    logoHeight: 40,
   },
 
   branding: {
+    headerLogoUrl: '',
+    footerLogoUrl: '',
+    headerLogoHeight: 44,
+    footerLogoHeight: 40,
     googleDriveLogoUrl: '',
     googleDriveFaviconUrl: '',
     customLogoUrl: '',

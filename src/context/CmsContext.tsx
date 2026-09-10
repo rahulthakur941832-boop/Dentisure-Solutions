@@ -106,15 +106,21 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             navItems: (parsed.header?.navItems && parsed.header.navItems.length > 0)
               ? parsed.header.navItems
               : INITIAL_CMS_DATA.header.navItems,
+            logoUrl: parsed.header?.logoUrl || parsed.branding?.headerLogoUrl || '',
+            logoHeight: parsed.header?.logoHeight || parsed.branding?.headerLogoHeight || 44,
           },
           footer: {
             ...INITIAL_CMS_DATA.footer,
             ...(parsed.footer || {}),
             agencyCredit: parsed.footer?.agencyCredit || INITIAL_CMS_DATA.footer.agencyCredit,
+            logoUrl: parsed.footer?.logoUrl || parsed.branding?.footerLogoUrl || '',
+            logoHeight: parsed.footer?.logoHeight || parsed.branding?.footerLogoHeight || 40,
           },
           branding: {
             ...INITIAL_CMS_DATA.branding,
             ...(parsed.branding || {}),
+            headerLogoUrl: parsed.branding?.headerLogoUrl || parsed.header?.logoUrl || '',
+            footerLogoUrl: parsed.branding?.footerLogoUrl || parsed.footer?.logoUrl || '',
           },
         };
       }

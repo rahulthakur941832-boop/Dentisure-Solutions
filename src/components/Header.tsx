@@ -58,101 +58,98 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const showTopBar = cmsData.header?.showTopBar !== false;
-  const showAuditButton = cmsData.header?.showAuditButton !== false;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-[0_2px_12px_-3px_rgba(0,0,0,0.04)]">
-      {/* Clean Corporate Utility Strip (No fake clutter, no Live Operations) */}
+    <header className="sticky top-0 z-50 w-full">
+      {/* 1. Top Announcement Bar (Stitch Specification) */}
       {showTopBar && (
-        <div className="bg-[#12304A] text-slate-200 text-xs py-2 px-4 sm:px-8 border-b border-slate-700/60">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-[11px] sm:text-xs text-slate-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-teal-400 shrink-0" />
-              <span className="font-medium text-slate-200 truncate max-w-[280px] sm:max-w-none">
-                {cmsData.header?.topNotice || 'Pan-India Dental Revenue Cycle & Practice Billing Management'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4 text-[11px] sm:text-xs">
-              <a
-                href={`tel:${(cmsData.brand?.phone || '+919876543210').replace(/[^0-9+]/g, '')}`}
-                className="inline-flex items-center gap-1.5 text-white hover:text-teal-300 font-semibold transition-colors"
-              >
-                <Phone className="w-3 h-3 text-teal-400" />
-                <span className="hidden sm:inline text-slate-400">
-                  {cmsData.header?.phoneLabel || 'Practice Advisory Desk:'}
-                </span>
-                <span>{cmsData.brand?.phone || '+91 98765 43210'}</span>
-              </a>
-            </div>
+        <div className="h-10 bg-[#001B31] px-4 sm:px-8 text-slate-200 flex items-center justify-between text-xs border-b border-[#12304A]">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#12304A] px-2.5 py-0.5 text-[#7EF5F1] font-mono text-[11px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7EF5F1] animate-pulse" />
+              <span>PAN-INDIA ADVISORY DESK: {cmsData.brand?.phone || '+91 98765 43210'}</span>
+            </span>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-slate-400 text-[11px]">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#7EF5F1]" />
+            <span>Direct Encrypted Remote Sync with Practo Ray, Clinicea, Dentrix &amp; Eaglesoft</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                onNavigate('contact');
+              }}
+              className="text-[11px] font-semibold text-[#7EF5F1] hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <span>Book Free 10-Point Audit</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
         </div>
       )}
 
-      {/* Main Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      {/* 2. Main Navigation Bar (Stitch Specification) */}
+      <div className="h-20 bg-white/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <button
           onClick={() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             onNavigate('home');
           }}
-          className="text-left cursor-pointer focus:outline-none"
+          className="text-left cursor-pointer focus:outline-none shrink-0"
         >
-          <Logo variant="full" />
+          <Logo variant="full" height={cmsData.header?.logoHeight || cmsData.branding?.headerLogoHeight || 44} />
         </button>
 
         {/* Dynamic Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-6 text-[14px] font-semibold text-slate-700">
+        <nav className="hidden xl:flex items-center gap-2 font-medium text-[14px]">
           {navItems.map((item) => {
             const isActive = !item.isExternal && currentPage === item.page;
             return (
               <button
                 key={item.id}
                 onClick={() => handleItemClick(item)}
-                className={`transition-colors cursor-pointer py-1 relative inline-flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 relative ${
                   isActive
-                    ? 'text-[#16A6A3] font-extrabold'
-                    : 'text-slate-700 hover:text-[#16A6A3]'
+                    ? 'bg-[#ECEEF0] text-[#001B31] font-bold shadow-xs'
+                    : 'text-[#43474D] hover:text-[#001B31] hover:bg-slate-100/70'
                 }`}
               >
                 <span>{item.label}</span>
                 {item.isExternal && <ExternalLink className="w-3 h-3 text-slate-400" />}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#16A6A3] rounded-full" />
+                  <span className="absolute bottom-0 left-2.5 right-2.5 h-0.5 bg-[#006A68] rounded-full" />
                 )}
               </button>
             );
           })}
         </nav>
 
-        {/* Action Button */}
-        {showAuditButton && (
-          <div className="hidden sm:flex items-center gap-3">
-            <button
-              onClick={onOpenAuditModal}
-              className="px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#12304A] hover:bg-[#16A6A3] rounded-xl transition-all shadow-sm hover:shadow-md cursor-pointer flex items-center gap-2"
-            >
-              <CalendarCheck className="w-4 h-4 text-teal-300" />
-              <span>{cmsData.header?.auditButtonText || 'Free Revenue Audit'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+        {/* Right Actions: Phone + Claim Free Revenue Audit Pill Button */}
+        <div className="flex items-center gap-3">
+          <a
+            href={`tel:${(cmsData.brand?.phone || '+919876543210').replace(/[^0-9+]/g, '')}`}
+            className="hidden sm:flex items-center gap-1.5 text-[#001B31] font-mono text-xs font-semibold hover:text-[#006A68] transition-colors px-2 py-1"
+          >
+            <Phone className="w-4 h-4 text-[#006A68]" />
+            <span>{cmsData.brand?.phone || '+91 98765 43210'}</span>
+          </a>
 
-        {/* Mobile Menu Toggle Button */}
-        <div className="flex lg:hidden items-center gap-2">
-          {showAuditButton && (
-            <button
-              onClick={onOpenAuditModal}
-              className="px-3 py-1.5 text-xs font-bold text-white bg-[#12304A] rounded-lg shadow-xs"
-            >
-              Audit
-            </button>
-          )}
+          <button
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              onNavigate('contact');
+            }}
+            className="inline-flex items-center justify-center rounded-full bg-[#006A68] hover:bg-[#00504E] text-white text-xs sm:text-sm font-bold px-4 sm:px-6 py-2.5 shadow-sm transition-all transform hover:-translate-y-0.5 cursor-pointer"
+          >
+            <span>{cmsData.header?.auditButtonText || 'Claim Free Revenue Audit'}</span>
+          </button>
+
+          {/* Mobile Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-slate-700 hover:text-[#16A6A3] focus:outline-none"
+            className="xl:hidden p-2 text-slate-700 hover:text-[#006A68] focus:outline-none cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -162,17 +159,17 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-5 py-5 shadow-xl animate-in slide-in-from-top-2 duration-200">
-          <div className="flex flex-col space-y-2 font-semibold text-slate-800 text-sm">
+        <div className="xl:hidden bg-white border-b border-slate-200 px-5 py-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
+          <div className="flex flex-col space-y-1 font-semibold text-slate-800 text-sm">
             {navItems.map((item) => {
               const isActive = !item.isExternal && currentPage === item.page;
               return (
                 <button
                   key={item.id}
                   onClick={() => handleItemClick(item)}
-                  className={`text-left py-2.5 px-3 rounded-lg transition-colors flex items-center justify-between ${
+                  className={`text-left py-2.5 px-3 rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
                     isActive
-                      ? 'bg-teal-50 text-[#16A6A3] font-extrabold'
+                      ? 'bg-teal-50 text-[#006A68] font-bold'
                       : 'hover:bg-slate-50 text-slate-800'
                   }`}
                 >
@@ -180,25 +177,32 @@ export const Header: React.FC<HeaderProps> = ({
                     {item.label}
                     {item.isExternal && <ExternalLink className="w-3 h-3 text-slate-400" />}
                   </span>
-                  {isActive && <span className="w-2 h-2 rounded-full bg-[#16A6A3]" />}
+                  {isActive && <span className="w-2 h-2 rounded-full bg-[#006A68]" />}
                 </button>
               );
             })}
 
-            {showAuditButton && (
-              <div className="pt-3 border-t border-slate-100 space-y-2">
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenAuditModal();
-                  }}
-                  className="w-full py-3 px-4 bg-[#12304A] hover:bg-[#16A6A3] text-white rounded-xl text-center text-xs font-bold flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <CalendarCheck className="w-4 h-4 text-teal-300" />
-                  <span>{cmsData.header?.auditButtonText || 'Free Revenue Audit'}</span>
-                </button>
-              </div>
-            )}
+            <div className="pt-3 border-t border-slate-100 space-y-2">
+              <a
+                href={`tel:${(cmsData.brand?.phone || '+919876543210').replace(/[^0-9+]/g, '')}`}
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 text-primary font-mono text-xs font-semibold"
+              >
+                <Phone className="w-3.5 h-3.5 text-[#006A68]" />
+                <span>{cmsData.brand?.phone || '+91 98765 43210'}</span>
+              </a>
+
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  onNavigate('contact');
+                }}
+                className="w-full py-3 px-4 bg-[#006A68] hover:bg-[#00504E] text-white rounded-full text-center text-xs font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+              >
+                <CalendarCheck className="w-4 h-4 text-teal-200" />
+                <span>{cmsData.header?.auditButtonText || 'Claim Free Revenue Audit'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

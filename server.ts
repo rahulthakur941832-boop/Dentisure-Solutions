@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
@@ -17,7 +18,19 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '500kb' }));
+app.use(express.json({ limit: '10mb' }));
+
+// Ensure public/uploads exists and serve static uploads
+const publicUploadDir = path.join(process.cwd(), 'public', 'uploads');
+if (!fs.existsSync(publicUploadDir)) {
+  fs.mkdirSync(publicUploadDir, { recursive: true });
+}
+app.use('/uploads', express.static(publicUploadDir));
+
+const distUploadDir = path.join(process.cwd(), 'dist', 'uploads');
+if (fs.existsSync(distUploadDir)) {
+  app.use('/uploads', express.static(distUploadDir));
+}
 
 // Simple in-memory rate limiting
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -78,6 +91,101 @@ app.post('/api/leads', applyRateLimit(20, 60000), (req, res) => {
 
 app.get('/api/leads', (req, res) => {
   res.json({ leads: submittedLeads });
+});
+
+// Real Image/File Upload Endpoint
+app.post('/api/upload', (req, res) => {
+  try {
+    const rawData = req.body.image || req.body.data;
+    if (!rawData || typeof rawData !== 'string') {
+      res.status(400).json({ error: 'No image data provided' });
+      return;
+    }
+
+    let base64Data = rawData;
+    let detectedExt = 'png';
+    let detectedMime = 'image/png';
+
+    // Parse Data URL if provided (e.g. data:image/png;base64,...)
+    const matches = rawData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (matches && matches.length === 3) {
+      detectedMime = matches[1];
+      base64Data = matches[2];
+      if (detectedMime === 'image/svg+xml') detectedExt = 'svg';
+      else if (detectedMime === 'image/jpeg' || detectedMime === 'image/jpg') detectedExt = 'jpg';
+      else if (detectedMime === 'image/webp') detectedExt = 'webp';
+      else if (detectedMime === 'image/gif') detectedExt = 'gif';
+      else if (detectedMime === 'image/x-icon' || detectedMime === 'image/vnd.microsoft.icon') detectedExt = 'ico';
+      else if (detectedMime === 'image/png') detectedExt = 'png';
+    } else if (req.body.filename) {
+      const ext = path.extname(req.body.filename).toLowerCase().replace('.', '');
+      if (['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif', 'ico'].includes(ext)) {
+        detectedExt = ext === 'jpeg' ? 'jpg' : ext;
+      }
+    }
+
+    const buffer = Buffer.from(base64Data, 'base64');
+    if (buffer.length === 0) {
+      res.status(400).json({ error: 'Invalid or empty image buffer' });
+      return;
+    }
+
+    const tagPrefix = req.body.tag ? req.body.tag.replace(/[^a-zA-Z0-9_-]/g, '') : 'logo';
+    const uniqueFilename = `${tagPrefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${detectedExt}`;
+
+    const uploadPath = path.join(process.cwd(), 'public', 'uploads', uniqueFilename);
+    fs.writeFileSync(uploadPath, buffer);
+
+    // If dist exists, also mirror to dist/uploads for production static serving
+    const distPath = path.join(process.cwd(), 'dist', 'uploads');
+    if (fs.existsSync(path.join(process.cwd(), 'dist'))) {
+      if (!fs.existsSync(distPath)) {
+        fs.mkdirSync(distPath, { recursive: true });
+      }
+      fs.writeFileSync(path.join(distPath, uniqueFilename), buffer);
+    }
+
+    const fileUrl = `/uploads/${uniqueFilename}`;
+    console.log(`[Upload API] Saved ${uniqueFilename} (${buffer.length} bytes) -> ${fileUrl}`);
+
+    res.json({
+      success: true,
+      url: fileUrl,
+      filename: uniqueFilename,
+      size: buffer.length,
+      mimeType: detectedMime,
+    });
+  } catch (err: any) {
+    console.error('[Upload API Error]', err);
+    res.status(500).json({ error: 'Failed to save uploaded image: ' + (err.message || 'Unknown error') });
+  }
+});
+
+// List uploaded files
+app.get('/api/uploads', (req, res) => {
+  try {
+    const targetDir = path.join(process.cwd(), 'public', 'uploads');
+    if (!fs.existsSync(targetDir)) {
+      res.json({ files: [] });
+      return;
+    }
+    const fileNames = fs.readdirSync(targetDir);
+    const files = fileNames
+      .filter((f) => !f.startsWith('.'))
+      .map((name) => {
+        const stats = fs.statSync(path.join(targetDir, name));
+        return {
+          name,
+          url: `/uploads/${name}`,
+          size: stats.size,
+          createdAt: stats.birthtime,
+        };
+      })
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    res.json({ files });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // AI Chatbot endpoint with rate limiting (Gemini with Knowledge Base fallback)

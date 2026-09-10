@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCms } from '../../context/CmsContext';
 import { getGoogleDriveDirectImageUrl } from '../../utils/googleDrive';
 import { HeaderNavItem, NavigationPage, SecondarySliderItem } from '../../types';
+import { ImageUploadField } from '../../components/ImageUploadField';
 import {
   Settings,
   Save,
@@ -65,15 +66,27 @@ export const GlobalSettingsView: React.FC = () => {
 
   // Local state copies
   const [brand, setBrand] = useState(cmsData.brand);
-  const [headerConfig, setHeaderConfig] = useState(cmsData.header);
+  const [headerConfig, setHeaderConfig] = useState({
+    ...cmsData.header,
+    logoUrl: cmsData.header?.logoUrl || cmsData.branding?.headerLogoUrl || '',
+    logoHeight: cmsData.header?.logoHeight || 44,
+  });
   const [sliderCards, setSliderCards] = useState<SecondarySliderItem[]>(cmsData.secondarySlider || []);
-  const [footer, setFooter] = useState(cmsData.footer);
-  const [branding, setBranding] = useState(cmsData.branding || {
-    googleDriveLogoUrl: '',
-    googleDriveFaviconUrl: '',
-    customLogoUrl: '',
-    customFaviconUrl: '',
-    agencyCredit: cmsData.footer.agencyCredit || 'Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)',
+  const [footer, setFooter] = useState({
+    ...cmsData.footer,
+    logoUrl: cmsData.footer?.logoUrl || cmsData.branding?.footerLogoUrl || '',
+    logoHeight: cmsData.footer?.logoHeight || 40,
+  });
+  const [branding, setBranding] = useState({
+    headerLogoUrl: cmsData.header?.logoUrl || cmsData.branding?.headerLogoUrl || '',
+    footerLogoUrl: cmsData.footer?.logoUrl || cmsData.branding?.footerLogoUrl || '',
+    headerLogoHeight: cmsData.header?.logoHeight || cmsData.branding?.headerLogoHeight || 44,
+    footerLogoHeight: cmsData.footer?.logoHeight || cmsData.branding?.footerLogoHeight || 40,
+    googleDriveLogoUrl: cmsData.branding?.googleDriveLogoUrl || '',
+    googleDriveFaviconUrl: cmsData.branding?.googleDriveFaviconUrl || '',
+    customLogoUrl: cmsData.branding?.customLogoUrl || '',
+    customFaviconUrl: cmsData.branding?.customFaviconUrl || '',
+    agencyCredit: cmsData.footer.agencyCredit || cmsData.branding?.agencyCredit || 'Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)',
     showLogoImage: false,
   });
 
@@ -93,14 +106,37 @@ export const GlobalSettingsView: React.FC = () => {
   };
 
   const handleSaveAll = () => {
-    updateSection('brand', brand);
-    updateSection('header', headerConfig);
-    updateSection('secondarySlider', sliderCards);
-    updateSection('footer', {
+    const finalHeaderLogo = headerConfig.logoUrl || branding.headerLogoUrl || '';
+    const finalHeaderHeight = headerConfig.logoHeight || branding.headerLogoHeight || 44;
+    const finalFooterLogo = footer.logoUrl || branding.footerLogoUrl || '';
+    const finalFooterHeight = footer.logoHeight || branding.footerLogoHeight || 40;
+
+    const updatedHeader = {
+      ...headerConfig,
+      logoUrl: finalHeaderLogo,
+      logoHeight: finalHeaderHeight,
+    };
+
+    const updatedFooter = {
       ...footer,
+      logoUrl: finalFooterLogo,
+      logoHeight: finalFooterHeight,
       agencyCredit: branding.agencyCredit || footer.agencyCredit,
-    });
-    updateSection('branding', branding);
+    };
+
+    const updatedBranding = {
+      ...branding,
+      headerLogoUrl: finalHeaderLogo,
+      footerLogoUrl: finalFooterLogo,
+      headerLogoHeight: finalHeaderHeight,
+      footerLogoHeight: finalFooterHeight,
+    };
+
+    updateSection('brand', brand);
+    updateSection('header', updatedHeader);
+    updateSection('secondarySlider', sliderCards);
+    updateSection('footer', updatedFooter);
+    updateSection('branding', updatedBranding);
     triggerSaveToast();
   };
 
@@ -199,6 +235,46 @@ export const GlobalSettingsView: React.FC = () => {
       {/* TAB 1: HEADER & TOP BAR NAVIGATION */}
       {activeTab === 'header' && (
         <div className="space-y-6">
+          {/* Header Logo Upload Section */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
+            <div className="pb-3 border-b border-slate-200">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-[#006A68]" />
+                <span>Header Brand Logo &amp; Navigation Visual Identity</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Upload or customize the primary brand logo rendered on the light / white header bar across all pages.
+              </p>
+            </div>
+
+            <ImageUploadField
+              label="Header Navigation Logo (White / Light Canvas)"
+              description="Upload an SVG, PNG, or WebP logo file or enter an image URL. Full-color horizontal logo lockup recommended."
+              value={headerConfig.logoUrl || branding.headerLogoUrl || ''}
+              onChange={(url) => {
+                setHeaderConfig((prev) => ({ ...prev, logoUrl: url }));
+                setBranding((prev) => ({ ...prev, headerLogoUrl: url }));
+              }}
+              onReset={() => {
+                setHeaderConfig((prev) => ({ ...prev, logoUrl: '' }));
+                setBranding((prev) => ({ ...prev, headerLogoUrl: '' }));
+              }}
+              defaultLogoSrc="/logo-dentisure.svg"
+              defaultLogoAlt="Official DentiSure Header Logo"
+              tag="header-logo"
+              heightValue={headerConfig.logoHeight || branding.headerLogoHeight || 44}
+              onHeightChange={(h) => {
+                setHeaderConfig((prev) => ({ ...prev, logoHeight: h }));
+                setBranding((prev) => ({ ...prev, headerLogoHeight: h }));
+              }}
+              defaultHeight={44}
+              minHeight={28}
+              maxHeight={72}
+              backgroundVariant="light"
+              recommendedFormatText="Full color horizontal lockup (SVG or transparent PNG recommended)"
+            />
+          </div>
+
           {/* Top Bar Settings */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
@@ -540,8 +616,49 @@ export const GlobalSettingsView: React.FC = () => {
 
       {/* TAB 3: FOOTER SETTINGS */}
       {activeTab === 'footer' && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
-          <h2 className="text-sm font-bold text-slate-900">Footer Notices, Copyright &amp; Agency Attribution</h2>
+        <div className="space-y-6">
+          {/* Footer Logo Upload Section */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
+            <div className="pb-3 border-b border-slate-200">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-[#16A6A3]" />
+                <span>Footer Brand Logo &amp; Visual Identity</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Upload or change the brand logo displayed on the dark navy (#12304A) footer across the entire website.
+              </p>
+            </div>
+
+            <ImageUploadField
+              label="Footer Logo (Dark Navy Canvas)"
+              description="Upload an SVG, PNG, or WebP logo file or enter an image URL. Recommended: White or light-colored artwork with transparent background."
+              value={footer.logoUrl || branding.footerLogoUrl || ''}
+              onChange={(url) => {
+                setFooter((prev) => ({ ...prev, logoUrl: url }));
+                setBranding((prev) => ({ ...prev, footerLogoUrl: url }));
+              }}
+              onReset={() => {
+                setFooter((prev) => ({ ...prev, logoUrl: '' }));
+                setBranding((prev) => ({ ...prev, footerLogoUrl: '' }));
+              }}
+              defaultLogoSrc="/logo-dentisure-white.svg"
+              defaultLogoAlt="Official DentiSure White Footer Logo"
+              tag="footer-logo"
+              heightValue={footer.logoHeight || branding.footerLogoHeight || 40}
+              onHeightChange={(h) => {
+                setFooter((prev) => ({ ...prev, logoHeight: h }));
+                setBranding((prev) => ({ ...prev, footerLogoHeight: h }));
+              }}
+              defaultHeight={40}
+              minHeight={24}
+              maxHeight={72}
+              backgroundVariant="dark"
+              recommendedFormatText="White vector SVG or transparent PNG (renders on #12304A navy)"
+            />
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
+            <h2 className="text-sm font-bold text-slate-900">Footer Notices, Copyright &amp; Agency Attribution</h2>
 
           <div>
             <label className="block font-bold text-slate-700 mb-1">About Company Summary</label>
@@ -593,6 +710,7 @@ export const GlobalSettingsView: React.FC = () => {
             />
           </div>
         </div>
+      </div>
       )}
 
       {/* TAB 4: BRAND & CONTACT (INDIA) */}
@@ -694,10 +812,10 @@ export const GlobalSettingsView: React.FC = () => {
           <div>
             <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <ImageIcon className="w-4 h-4 text-[#16A6A3]" />
-              <span>Logo &amp; Favicon Management</span>
+              <span>Master Brand Assets &amp; Logo Management</span>
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Supports Google Drive sharing links and direct image URLs for live header, footer, and browser tab display.
+              Upload and manage your Footer Logo, Header Logo, and Browser Tab Favicon with real file upload, instant preview, and custom height adjustments.
             </p>
           </div>
 
@@ -723,80 +841,100 @@ export const GlobalSettingsView: React.FC = () => {
             />
           </div>
 
-          {/* Google Drive / Custom Logo Field */}
-          <div className="space-y-3 pt-2">
-            <label className="block font-bold text-slate-800 text-xs">
-              Header &amp; Footer Logo — Image URL or Google Drive Link
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={branding.googleDriveLogoUrl || ''}
-                onChange={(e) => setBranding({ ...branding, googleDriveLogoUrl: e.target.value })}
-                placeholder="https://drive.google.com/file/d/... or direct image URL"
-                className="flex-1 p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs"
-              />
-              {branding.googleDriveLogoUrl && (
-                <button
-                  type="button"
-                  onClick={() => setBranding({ ...branding, googleDriveLogoUrl: '' })}
-                  className="px-3 py-2 bg-slate-100 hover:bg-rose-50 text-rose-600 border border-slate-200 rounded-xl font-bold cursor-pointer"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
+          {/* Footer Logo Uploader */}
+          <div className="space-y-3 pt-2 border-t border-slate-200">
+            <h3 className="font-bold text-slate-900 text-xs flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#12304A]"></span>
+              <span>1. Footer Brand Logo (Navy / Dark Canvas)</span>
+            </h3>
+            <ImageUploadField
+              label="Footer Logo File &amp; Settings"
+              description="Appears in the dark footer across all pages. White or high-contrast vector/PNG recommended."
+              value={footer.logoUrl || branding.footerLogoUrl || ''}
+              onChange={(url) => {
+                setFooter((prev) => ({ ...prev, logoUrl: url }));
+                setBranding((prev) => ({ ...prev, footerLogoUrl: url }));
+              }}
+              onReset={() => {
+                setFooter((prev) => ({ ...prev, logoUrl: '' }));
+                setBranding((prev) => ({ ...prev, footerLogoUrl: '' }));
+              }}
+              defaultLogoSrc="/logo-dentisure-white.svg"
+              defaultLogoAlt="DentiSure Official Footer Logo"
+              tag="footer-logo"
+              heightValue={footer.logoHeight || branding.footerLogoHeight || 40}
+              onHeightChange={(h) => {
+                setFooter((prev) => ({ ...prev, logoHeight: h }));
+                setBranding((prev) => ({ ...prev, footerLogoHeight: h }));
+              }}
+              defaultHeight={40}
+              minHeight={24}
+              maxHeight={72}
+              backgroundVariant="dark"
+              recommendedFormatText="White vector SVG or transparent PNG (renders on #12304A dark navy)"
+            />
+          </div>
 
-            {/* Live Preview */}
-            {branding.googleDriveLogoUrl && (
-              <div className="mt-3 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                <span className="text-[11px] font-bold text-slate-600 block mb-2">Live Logo Preview:</span>
-                <div className="flex flex-wrap items-center gap-6">
-                  <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs inline-flex items-center">
-                    <img
-                      src={getGoogleDriveDirectImageUrl(branding.googleDriveLogoUrl)}
-                      alt="Drive Logo Preview"
-                      className="max-h-12 max-w-[200px] object-contain"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                  <div className="p-3 bg-[#12304A] rounded-xl border border-slate-700 shadow-2xs inline-flex items-center">
-                    <img
-                      src={getGoogleDriveDirectImageUrl(branding.googleDriveLogoUrl)}
-                      alt="Drive Logo Preview on Dark"
-                      className="max-h-12 max-w-[200px] object-contain"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+          {/* Header Logo Uploader */}
+          <div className="space-y-3 pt-4 border-t border-slate-200">
+            <h3 className="font-bold text-slate-900 text-xs flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#006A68]"></span>
+              <span>2. Header Navigation Logo (Light Canvas)</span>
+            </h3>
+            <ImageUploadField
+              label="Header Navigation Logo File &amp; Settings"
+              description="Appears in the top white header on all pages. Full color SVG or PNG recommended."
+              value={headerConfig.logoUrl || branding.headerLogoUrl || ''}
+              onChange={(url) => {
+                setHeaderConfig((prev) => ({ ...prev, logoUrl: url }));
+                setBranding((prev) => ({ ...prev, headerLogoUrl: url }));
+              }}
+              onReset={() => {
+                setHeaderConfig((prev) => ({ ...prev, logoUrl: '' }));
+                setBranding((prev) => ({ ...prev, headerLogoUrl: '' }));
+              }}
+              defaultLogoSrc="/logo-dentisure.svg"
+              defaultLogoAlt="DentiSure Official Header Logo"
+              tag="header-logo"
+              heightValue={headerConfig.logoHeight || branding.headerLogoHeight || 44}
+              onHeightChange={(h) => {
+                setHeaderConfig((prev) => ({ ...prev, logoHeight: h }));
+                setBranding((prev) => ({ ...prev, headerLogoHeight: h }));
+              }}
+              defaultHeight={44}
+              minHeight={28}
+              maxHeight={72}
+              backgroundVariant="light"
+              recommendedFormatText="Full color horizontal lockup (SVG or transparent PNG recommended)"
+            />
           </div>
 
           {/* Favicon Field */}
           <div className="space-y-3 pt-4 border-t border-slate-200">
-            <label className="block font-bold text-slate-800 text-xs flex items-center gap-1.5">
+            <h3 className="font-bold text-slate-900 text-xs flex items-center gap-2">
               <Globe className="w-3.5 h-3.5 text-[#16A6A3]" />
-              <span>Browser Favicon — Google Drive URL or Image URL</span>
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={branding.googleDriveFaviconUrl || ''}
-                onChange={(e) => setBranding({ ...branding, googleDriveFaviconUrl: e.target.value })}
-                placeholder="https://drive.google.com/file/d/... for Favicon"
-                className="flex-1 p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs"
-              />
-              {branding.googleDriveFaviconUrl && (
-                <button
-                  type="button"
-                  onClick={() => setBranding({ ...branding, googleDriveFaviconUrl: '' })}
-                  className="px-3 py-2 bg-slate-100 hover:bg-rose-50 text-rose-600 border border-slate-200 rounded-xl font-bold cursor-pointer"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
+              <span>3. Browser Tab Favicon</span>
+            </h3>
+            <ImageUploadField
+              label="Favicon File or URL"
+              description="Appears in the browser tab title bar (square 32x32 or 64x64 icon)."
+              value={branding.customFaviconUrl || branding.googleDriveFaviconUrl || ''}
+              onChange={(url) => {
+                setBranding((prev) => ({ ...prev, customFaviconUrl: url, googleDriveFaviconUrl: url }));
+              }}
+              onReset={() => {
+                setBranding((prev) => ({ ...prev, customFaviconUrl: '', googleDriveFaviconUrl: '' }));
+              }}
+              defaultLogoSrc="/logo-transparent.png"
+              defaultLogoAlt="Favicon"
+              tag="favicon"
+              heightValue={32}
+              defaultHeight={32}
+              minHeight={24}
+              maxHeight={64}
+              backgroundVariant="light"
+              recommendedFormatText="Square PNG, SVG, or ICO (32x32 or 64x64)"
+            />
           </div>
         </div>
       )}

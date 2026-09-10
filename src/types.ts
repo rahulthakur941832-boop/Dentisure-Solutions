@@ -54,6 +54,8 @@ export interface HeaderCmsConfig {
   portalLinkText?: string;
   tickerMessages?: string[];
   navItems: HeaderNavItem[];
+  logoUrl?: string;
+  logoHeight?: number;
 }
 
 export interface HeroPerspectiveOption {
@@ -231,8 +233,14 @@ export interface CmsData {
     copyright: string;
     agencyCredit?: string;
     pmsList: string[];
+    logoUrl?: string;
+    logoHeight?: number;
   };
   branding?: {
+    headerLogoUrl?: string;
+    footerLogoUrl?: string;
+    headerLogoHeight?: number;
+    footerLogoHeight?: number;
     googleDriveLogoUrl?: string;
     googleDriveFaviconUrl?: string;
     customLogoUrl?: string;

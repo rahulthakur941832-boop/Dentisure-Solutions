@@ -51,6 +51,17 @@ export const BRAND_ASSETS: LogoAssetItem[] = [
     previewType: 'logo-transparent',
   },
   {
+    id: 'logo-footer-white',
+    badge: 'LOGO (WHITE MONOCHROME - FOOTER)',
+    title: 'Official Footer Logo — White High Contrast',
+    description: 'Crisp vector silhouette with pure white typography optimized for dark navy (#12304A) website footers.',
+    pngPath: '/logo-white.png',
+    svgPath: '/logo-dentisure-white.svg',
+    dimensions: '1240 × 300 px (Vector Scalable)',
+    isTransparent: true,
+    previewType: 'logo-transparent',
+  },
+  {
     id: 'fav-white',
     badge: 'FAVICON (PNG - WHITE BACKGROUND)',
     title: 'Square Favicon — White Background',
