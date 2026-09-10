@@ -55,8 +55,23 @@ function applyRateLimit(limit: number, windowMs: number) {
   };
 }
 
-// In-memory leads storage synced with client
-const submittedLeads: any[] = [];
+// Ensure data directory exists for persistent CMS and Leads storage
+const dataDir = path.join(process.cwd(), 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Leads storage synced with disk file
+const leadsFilePath = path.join(dataDir, 'leads.json');
+let submittedLeads: any[] = [];
+if (fs.existsSync(leadsFilePath)) {
+  try {
+    submittedLeads = JSON.parse(fs.readFileSync(leadsFilePath, 'utf8'));
+    console.log(`[Server Leads] Loaded ${submittedLeads.length} leads from disk`);
+  } catch (e) {
+    console.warn('Failed to parse leads.json:', e);
+  }
+}
 
 // Gemini Client Lazy Initializer
 let aiClient: GoogleGenAI | null = null;
@@ -85,12 +100,89 @@ app.post('/api/leads', applyRateLimit(20, 60000), (req, res) => {
     return;
   }
   submittedLeads.unshift(newLead);
+  try {
+    fs.writeFileSync(leadsFilePath, JSON.stringify(submittedLeads, null, 2), 'utf8');
+  } catch (e) {
+    console.warn('[Server Leads] Failed to write leads to disk:', e);
+  }
   console.log(`[DentiSure Leads] New audit requested for ${newLead.doctorName} (${newLead.practiceName}) - Forwarding alert to usmilesbilling@gmail.com`);
   res.json({ success: true, lead: newLead, count: submittedLeads.length });
 });
 
 app.get('/api/leads', (req, res) => {
   res.json({ leads: submittedLeads });
+});
+
+const cmsFilePath = path.join(dataDir, 'cms-content.json');
+
+// Initialize server-side CMS state from file
+let serverCmsData: any = null;
+if (fs.existsSync(cmsFilePath)) {
+  try {
+    const raw = fs.readFileSync(cmsFilePath, 'utf8');
+    serverCmsData = JSON.parse(raw);
+    console.log('[Server CMS] Loaded persisted CMS data from disk');
+  } catch (e) {
+    console.warn('[Server CMS] Failed to parse cms-content.json:', e);
+  }
+}
+
+// Authoritative Server CMS Endpoints (accessible across incognito, other browsers, devices)
+app.get('/api/cms', (req, res) => {
+  res.json({
+    success: true,
+    data: serverCmsData,
+    timestamp: Date.now(),
+  });
+});
+
+app.post('/api/cms', (req, res) => {
+  try {
+    const incoming = req.body?.data || req.body;
+    if (!incoming || typeof incoming !== 'object') {
+      res.status(400).json({ error: 'Invalid CMS payload' });
+      return;
+    }
+
+    serverCmsData = incoming;
+
+    // Write to /data/cms-content.json
+    fs.writeFileSync(cmsFilePath, JSON.stringify(serverCmsData, null, 2), 'utf8');
+
+    // Also mirror to /dist/data if dist exists
+    const distDataDir = path.join(process.cwd(), 'dist', 'data');
+    if (fs.existsSync(path.join(process.cwd(), 'dist'))) {
+      if (!fs.existsSync(distDataDir)) {
+        fs.mkdirSync(distDataDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(distDataDir, 'cms-content.json'), JSON.stringify(serverCmsData, null, 2), 'utf8');
+    }
+
+    console.log(
+      `[Server CMS] Saved CMS data to server. Header Logo: "${serverCmsData?.header?.logoUrl || ''}", Footer Logo: "${serverCmsData?.footer?.logoUrl || ''}"`
+    );
+
+    res.json({
+      success: true,
+      message: 'CMS data successfully saved to server storage',
+      data: serverCmsData,
+    });
+  } catch (err: any) {
+    console.error('[Server CMS Error]', err);
+    res.status(500).json({ error: 'Failed to write CMS data to disk: ' + (err.message || 'Unknown error') });
+  }
+});
+
+app.post('/api/cms/reset', (req, res) => {
+  try {
+    serverCmsData = null;
+    if (fs.existsSync(cmsFilePath)) {
+      fs.unlinkSync(cmsFilePath);
+    }
+    res.json({ success: true, message: 'Server CMS reset to defaults' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Real Image/File Upload Endpoint

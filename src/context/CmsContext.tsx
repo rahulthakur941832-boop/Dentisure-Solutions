@@ -69,6 +69,10 @@ interface CmsContextType {
   reorderHeaderNavItems: (items: HeaderNavItem[]) => void;
   resetHeaderNavItems: () => void;
 
+  // Server & Multi-browser Persistence
+  saveToServer: (dataToSave?: CmsData) => Promise<{ success: boolean; error?: string }>;
+  isSyncingServer: boolean;
+
   // UI Modal control
   isAdminPanelOpen: boolean;
   isLoginModalOpen: boolean;
@@ -158,6 +162,85 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isSyncingServer, setIsSyncingServer] = useState<boolean>(false);
+
+  const isInitialMount = React.useRef(true);
+  const serverLoadedRef = React.useRef(false);
+
+  // Fetch authoritative server CMS data on mount so ALL browsers & incognito tabs see identical live data!
+  useEffect(() => {
+    let isMounted = true;
+    async function loadAuthoritativeServerCms() {
+      try {
+        const response = await fetch('/api/cms');
+        if (response.ok) {
+          const json = await response.json();
+          if (json?.data && isMounted) {
+            const serverData = json.data;
+            serverLoadedRef.current = true;
+            console.log('[CMS Context] Loaded authoritative server CMS. Updating frontend state.');
+            setCmsData((prev) => {
+              const merged: CmsData = {
+                ...INITIAL_CMS_DATA,
+                ...prev,
+                ...serverData,
+                header: {
+                  ...INITIAL_CMS_DATA.header,
+                  ...(prev?.header || {}),
+                  ...(serverData?.header || {}),
+                  logoUrl:
+                    serverData?.header?.logoUrl !== undefined
+                      ? serverData.header.logoUrl
+                      : serverData?.branding?.headerLogoUrl || prev?.header?.logoUrl || '',
+                  logoHeight:
+                    serverData?.header?.logoHeight ||
+                    serverData?.branding?.headerLogoHeight ||
+                    prev?.header?.logoHeight ||
+                    44,
+                },
+                footer: {
+                  ...INITIAL_CMS_DATA.footer,
+                  ...(prev?.footer || {}),
+                  ...(serverData?.footer || {}),
+                  logoUrl:
+                    serverData?.footer?.logoUrl !== undefined
+                      ? serverData.footer.logoUrl
+                      : serverData?.branding?.footerLogoUrl || prev?.footer?.logoUrl || '',
+                  logoHeight:
+                    serverData?.footer?.logoHeight ||
+                    serverData?.branding?.footerLogoHeight ||
+                    prev?.footer?.logoHeight ||
+                    40,
+                },
+                branding: {
+                  ...INITIAL_CMS_DATA.branding,
+                  ...(prev?.branding || {}),
+                  ...(serverData?.branding || {}),
+                  headerLogoUrl:
+                    serverData?.branding?.headerLogoUrl || serverData?.header?.logoUrl || prev?.branding?.headerLogoUrl || '',
+                  footerLogoUrl:
+                    serverData?.branding?.footerLogoUrl || serverData?.footer?.logoUrl || prev?.branding?.footerLogoUrl || '',
+                },
+              };
+              try {
+                localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(merged));
+              } catch (_) {}
+              return merged;
+            });
+          } else {
+            serverLoadedRef.current = true;
+          }
+        }
+      } catch (err) {
+        console.warn('[CMS Context] Could not reach /api/cms, continuing with local data:', err);
+        serverLoadedRef.current = true;
+      }
+    }
+    loadAuthoritativeServerCms();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Sync CMS data to localStorage and dynamic document SEO
   useEffect(() => {
@@ -176,6 +259,55 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       metaDesc.setAttribute('content', cmsData.seo.metaDescription);
     }
   }, [cmsData]);
+
+  // Auto-sync debounced (1500ms) to server whenever cmsData changes after server initial load
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (!serverLoadedRef.current) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetch('/api/cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: cmsData }),
+      }).catch((e) => console.warn('[CMS Context] Auto-sync to server error:', e));
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [cmsData]);
+
+  // Save explicitly to authoritative server storage (file + memory)
+  const saveToServer = async (dataToSave?: CmsData): Promise<{ success: boolean; error?: string }> => {
+    const payload = dataToSave || cmsData;
+    setIsSyncingServer(true);
+    try {
+      const res = await fetch('/api/cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: payload }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        console.log('[CMS Context] Saved to server storage successfully:', json);
+        try {
+          localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(payload));
+        } catch (_) {}
+        return { success: true };
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        return { success: false, error: errJson.error || 'Server returned an error status' };
+      }
+    } catch (err: any) {
+      console.error('[CMS Context] Network error saving to server:', err);
+      return { success: false, error: err.message || 'Network error' };
+    } finally {
+      setIsSyncingServer(false);
+    }
+  };
 
   // Sync Leads to localStorage
   useEffect(() => {
@@ -228,6 +360,9 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const resetToDefaults = () => {
     setCmsData(INITIAL_CMS_DATA);
     localStorage.removeItem(CMS_STORAGE_KEY);
+    fetch('/api/cms/reset', { method: 'POST' }).catch((e) =>
+      console.warn('Failed to reset server CMS:', e)
+    );
   };
 
   const exportJsonBackup = () => {
@@ -483,6 +618,8 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deleteHeaderNavItem,
         reorderHeaderNavItems,
         resetHeaderNavItems,
+        saveToServer,
+        isSyncingServer,
         isAdminPanelOpen,
         isLoginModalOpen,
         openAdminPanel: () => {

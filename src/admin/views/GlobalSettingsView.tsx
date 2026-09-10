@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCms } from '../../context/CmsContext';
 import { getGoogleDriveDirectImageUrl } from '../../utils/googleDrive';
-import { HeaderNavItem, NavigationPage, SecondarySliderItem } from '../../types';
+import { HeaderNavItem, NavigationPage, SecondarySliderItem, CmsData } from '../../types';
 import { ImageUploadField } from '../../components/ImageUploadField';
 import {
   Settings,
@@ -59,6 +59,8 @@ export const GlobalSettingsView: React.FC = () => {
     deleteHeaderNavItem,
     reorderHeaderNavItems,
     resetHeaderNavItems,
+    saveToServer,
+    isSyncingServer,
   } = useCms();
 
   const [activeTab, setActiveTab] = useState<'header' | 'slider' | 'footer' | 'brand' | 'branding'>('header');
@@ -90,6 +92,34 @@ export const GlobalSettingsView: React.FC = () => {
     showLogoImage: false,
   });
 
+  // Keep local copies in sync when authoritative server CMS data loads
+  useEffect(() => {
+    setBrand(cmsData.brand);
+    setHeaderConfig({
+      ...cmsData.header,
+      logoUrl: cmsData.header?.logoUrl || cmsData.branding?.headerLogoUrl || '',
+      logoHeight: cmsData.header?.logoHeight || 44,
+    });
+    setSliderCards(cmsData.secondarySlider || []);
+    setFooter({
+      ...cmsData.footer,
+      logoUrl: cmsData.footer?.logoUrl || cmsData.branding?.footerLogoUrl || '',
+      logoHeight: cmsData.footer?.logoHeight || 40,
+    });
+    setBranding({
+      headerLogoUrl: cmsData.header?.logoUrl || cmsData.branding?.headerLogoUrl || '',
+      footerLogoUrl: cmsData.footer?.logoUrl || cmsData.branding?.footerLogoUrl || '',
+      headerLogoHeight: cmsData.header?.logoHeight || cmsData.branding?.headerLogoHeight || 44,
+      footerLogoHeight: cmsData.footer?.logoHeight || cmsData.branding?.footerLogoHeight || 40,
+      googleDriveLogoUrl: cmsData.branding?.googleDriveLogoUrl || '',
+      googleDriveFaviconUrl: cmsData.branding?.googleDriveFaviconUrl || '',
+      customLogoUrl: cmsData.branding?.customLogoUrl || '',
+      customFaviconUrl: cmsData.branding?.customFaviconUrl || '',
+      agencyCredit: cmsData.footer.agencyCredit || cmsData.branding?.agencyCredit || 'Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)',
+      showLogoImage: false,
+    });
+  }, [cmsData]);
+
   // New nav item form state
   const [newNavLabel, setNewNavLabel] = useState('');
   const [newNavPage, setNewNavPage] = useState<string>('home');
@@ -102,10 +132,10 @@ export const GlobalSettingsView: React.FC = () => {
 
   const triggerSaveToast = () => {
     setSavedAlert(true);
-    setTimeout(() => setSavedAlert(false), 2500);
+    setTimeout(() => setSavedAlert(false), 3000);
   };
 
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
     const finalHeaderLogo = headerConfig.logoUrl || branding.headerLogoUrl || '';
     const finalHeaderHeight = headerConfig.logoHeight || branding.headerLogoHeight || 44;
     const finalFooterLogo = footer.logoUrl || branding.footerLogoUrl || '';
@@ -132,11 +162,23 @@ export const GlobalSettingsView: React.FC = () => {
       footerLogoHeight: finalFooterHeight,
     };
 
+    const fullPayload: CmsData = {
+      ...cmsData,
+      brand,
+      header: updatedHeader,
+      secondarySlider: sliderCards,
+      footer: updatedFooter,
+      branding: updatedBranding,
+    };
+
     updateSection('brand', brand);
     updateSection('header', updatedHeader);
     updateSection('secondarySlider', sliderCards);
     updateSection('footer', updatedFooter);
     updateSection('branding', updatedBranding);
+
+    // Save to real server disk storage immediately so all other browsers & incognito sessions see changes
+    await saveToServer(fullPayload);
     triggerSaveToast();
   };
 
@@ -194,17 +236,27 @@ export const GlobalSettingsView: React.FC = () => {
 
         <div className="flex items-center gap-3">
           {savedAlert && (
-            <div className="px-3.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 animate-in fade-in">
+            <div className="px-3.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 animate-in fade-in shadow-xs">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Saved in Real-Time!</span>
+              <span>Saved &amp; Published Server-Wide (Live in Incognito &amp; All Browsers)</span>
             </div>
           )}
           <button
             onClick={handleSaveAll}
-            className="px-4 py-2.5 bg-[#16A6A3] hover:bg-teal-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+            disabled={isSyncingServer}
+            className="px-4 py-2.5 bg-[#006A68] hover:bg-[#005553] disabled:opacity-60 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-all"
           >
-            <Save className="w-4 h-4" />
-            <span>Save All Settings</span>
+            {isSyncingServer ? (
+              <>
+                <RotateCcw className="w-4 h-4 animate-spin" />
+                <span>Saving to Server...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save All Settings</span>
+              </>
+            )}
           </button>
         </div>
       </div>
