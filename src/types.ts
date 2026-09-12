@@ -117,6 +117,25 @@ export interface SecondarySliderItem {
   iconName?: string;
 }
 
+export interface TopSlideItem {
+  id: string;
+  badge?: string;
+  title: string;
+  description: string;
+  ctaText: string;
+  ctaLink: NavigationPage | string;
+  image?: string;
+  enabled: boolean;
+  order: number;
+}
+
+export interface TopSliderConfig {
+  enabled: boolean;
+  autoplay: boolean;
+  autoplayIntervalMs: number;
+  slides: TopSlideItem[];
+}
+
 export interface TrustMetricItem {
   id: string;
   value: string;
@@ -199,6 +218,7 @@ export interface CmsData {
     hours: string;
   };
   header: HeaderCmsConfig;
+  topSlider?: TopSliderConfig;
   topTickerItems: { category: string; title: string; badge?: string }[];
   hero: HeroCmsConfig;
   secondarySlider: SecondarySliderItem[];

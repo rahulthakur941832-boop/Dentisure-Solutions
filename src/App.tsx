@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
+import { TopSliderBanner } from './components/TopSliderBanner';
 import { Footer } from './components/Footer';
 import { ContactAuditModal } from './components/ContactAuditModal';
 import { BrochureModal } from './components/BrochureModal';
@@ -120,6 +121,12 @@ export function App() {
     <div className="min-h-screen flex flex-col bg-[#F8FAFB] text-[#12304A]">
       {/* White Screen Animated Brand Preloader */}
       <PageLoader />
+
+      {/* Top Promotional Slider Banner (CMS-Controlled) */}
+      <TopSliderBanner
+        onNavigate={navigateTo}
+        onOpenAuditModal={() => handleOpenAudit()}
+      />
 
       {/* Primary Sticky Header */}
       <Header

@@ -16,6 +16,7 @@ import {
   Play,
   Video,
 } from 'lucide-react';
+import { PerspectiveCard } from './PerspectiveCard';
 
 interface HeroSectionProps {
   onOpenAuditModal: () => void;
@@ -218,8 +219,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Right Column: Practice Operations Desk (Supports Video & Image) */}
           <div className="lg:col-span-5 w-full">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
-              {/* App-like Top Header */}
+            <PerspectiveCard intensity={6} className="w-full">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+                {/* App-like Top Header */}
               <div className="bg-[#12304A] px-5 py-3.5 text-white flex items-center justify-between border-b border-slate-700">
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-lg bg-teal-500/20 flex items-center justify-center text-teal-300">
@@ -387,7 +389,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 </button>
               </div>
             </div>
-          </div>
+          </PerspectiveCard>
+        </div>
         </div>
       </div>
     </section>

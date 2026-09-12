@@ -148,6 +148,16 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         footerLogoUrl:
           serverData?.branding?.footerLogoUrl || serverData?.footer?.logoUrl || '',
       },
+      topSlider: serverData?.topSlider
+        ? {
+            enabled: serverData.topSlider.enabled !== false,
+            autoplay: serverData.topSlider.autoplay !== false,
+            autoplayIntervalMs: Number(serverData.topSlider.autoplayIntervalMs) || 6000,
+            slides: Array.isArray(serverData.topSlider.slides) && serverData.topSlider.slides.length > 0
+              ? serverData.topSlider.slides
+              : (INITIAL_CMS_DATA.topSlider?.slides || []),
+          }
+        : INITIAL_CMS_DATA.topSlider,
     };
   };
 

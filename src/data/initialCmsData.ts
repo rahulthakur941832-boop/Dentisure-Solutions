@@ -47,6 +47,47 @@ export const INITIAL_CMS_DATA: CmsData = {
     logoHeight: 44,
   },
 
+  topSlider: {
+    enabled: true,
+    autoplay: true,
+    autoplayIntervalMs: 6000,
+    slides: [
+      {
+        id: 'top-slide-1',
+        badge: '98.4% Clean Claim Acceptance',
+        title: 'Stop Revenue Leakage from Dental Insurance Denials',
+        description: 'CDT claim scrubbing, narrative drafting, and automated clearinghouse submission within 24–48 hours.',
+        ctaText: 'Claim Free 10-Point Audit',
+        ctaLink: 'contact',
+        image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&auto=format&fit=crop&q=80',
+        enabled: true,
+        order: 1,
+      },
+      {
+        id: 'top-slide-2',
+        badge: 'Aging AR Recovery Sprint',
+        title: 'Recapture Trapped 60+ and 90+ Day Insurance Balances',
+        description: 'Our senior recovery team conducts line-by-line carrier appeals without alienating your patients.',
+        ctaText: 'Explore Claim Solutions',
+        ctaLink: 'solutions',
+        image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&auto=format&fit=crop&q=80',
+        enabled: true,
+        order: 2,
+      },
+      {
+        id: 'top-slide-3',
+        badge: 'Zero Front-Desk Chaos',
+        title: 'Reclaim 20+ Hours Every Week for Patient Clinical Care',
+        description: 'Comprehensive pre-visit verification completed 72 hours prior to hygiene. Direct Dentrix, Open Dental & Eaglesoft integration.',
+        ctaText: 'Calculate Practice ROI',
+        ctaLink: 'pricing',
+        image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80',
+        enabled: true,
+        order: 3,
+      },
+    ],
+  },
+
   topTickerItems: [
     { category: 'Insurance Verification', title: 'Pre-Visit Breakdown Entered Directly in Your Practice Management Software', badge: 'Active' },
     { category: 'Claim Scrubbing', title: 'Clean Submissions with Tooth-Specific Radiographs & Detailed Narratives', badge: 'Active' },

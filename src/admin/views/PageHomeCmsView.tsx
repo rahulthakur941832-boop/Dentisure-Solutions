@@ -23,16 +23,46 @@ import {
   ListFilter,
   Tag,
   Building,
+  EyeOff,
+  ExternalLink,
+  Clock,
+  Compass,
 } from 'lucide-react';
-import { FAQItem, TestimonialItem, HeroPerspective, HeroPerspectiveOption } from '../../types';
+import {
+  FAQItem,
+  TestimonialItem,
+  HeroPerspective,
+  HeroPerspectiveOption,
+  TopSliderConfig,
+  TopSlideItem,
+  NavigationPage,
+} from '../../types';
+
+const moveItem = <T,>(list: T[], index: number, direction: 'up' | 'down'): T[] => {
+  const targetIndex = direction === 'up' ? index - 1 : index + 1;
+  if (targetIndex < 0 || targetIndex >= list.length) return list;
+  const copy = [...list];
+  const temp = copy[index];
+  copy[index] = copy[targetIndex];
+  copy[targetIndex] = temp;
+  return copy;
+};
 
 export const PageHomeCmsView: React.FC = () => {
   const { cmsData, updateSection, saveToServer } = useCms();
-  const [activeSubTab, setActiveSubTab] = useState<'hero' | 'metrics' | 'why' | 'testimonials' | 'faq' | 'cta'>('hero');
+  const [activeSubTab, setActiveSubTab] = useState<'slider' | 'hero' | 'metrics' | 'why' | 'testimonials' | 'faq' | 'cta'>('slider');
   const [activePerspective, setActivePerspective] = useState<HeroPerspective>('elite');
   const [savedAlert, setSavedAlert] = useState(false);
 
   // Local working copy of home data
+  const [topSlider, setTopSlider] = useState<TopSliderConfig>(
+    cmsData.topSlider || {
+      enabled: true,
+      autoplay: true,
+      autoplayIntervalMs: 6000,
+      slides: [],
+    }
+  );
   const [hero, setHero] = useState(cmsData.hero);
   const [metrics, setMetrics] = useState(cmsData.trustMetrics);
   const [whyChoose, setWhyChoose] = useState(cmsData.whyChoose);
@@ -48,6 +78,61 @@ export const PageHomeCmsView: React.FC = () => {
   const triggerSaveToast = () => {
     setSavedAlert(true);
     setTimeout(() => setSavedAlert(false), 2500);
+  };
+
+  const handleSaveTopSlider = async () => {
+    updateSection('topSlider', topSlider);
+    await saveToServer({ ...cmsData, topSlider });
+    triggerSaveToast();
+  };
+
+  const handleAddSlide = () => {
+    const newSlide: TopSlideItem = {
+      id: `slide-${Date.now()}`,
+      badge: 'Special Announcement',
+      title: 'New Clinical Billing Highlight',
+      description: 'Concise explanation of the workflow, technology, or insurance benefit.',
+      ctaText: 'Learn More',
+      ctaLink: 'solutions',
+      image: '',
+      enabled: true,
+      order: (topSlider.slides?.length || 0) + 1,
+    };
+    setTopSlider({
+      ...topSlider,
+      slides: [...(topSlider.slides || []), newSlide],
+    });
+  };
+
+  const handleUpdateSlide = (id: string, updates: Partial<TopSlideItem>) => {
+    setTopSlider({
+      ...topSlider,
+      slides: (topSlider.slides || []).map((s) =>
+        s.id === id ? { ...s, ...updates } : s
+      ),
+    });
+  };
+
+  const handleDeleteSlide = (id: string) => {
+    if (confirm('Are you sure you want to delete this slide?')) {
+      setTopSlider({
+        ...topSlider,
+        slides: (topSlider.slides || []).filter((s) => s.id !== id),
+      });
+    }
+  };
+
+  const handleMoveSlide = (index: number, direction: 'up' | 'down') => {
+    const list: TopSlideItem[] = topSlider.slides || [];
+    const reordered = moveItem<TopSlideItem>(list, index, direction);
+    const updated = reordered.map((slide: TopSlideItem, idx: number): TopSlideItem => ({
+      ...slide,
+      order: idx + 1,
+    }));
+    setTopSlider({
+      ...topSlider,
+      slides: updated,
+    });
   };
 
   const handleSaveHero = async () => {
@@ -90,17 +175,6 @@ export const PageHomeCmsView: React.FC = () => {
     triggerSaveToast();
   };
 
-  // Reordering helpers
-  const moveItem = <T,>(list: T[], index: number, direction: 'up' | 'down'): T[] => {
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= list.length) return list;
-    const copy = [...list];
-    const temp = copy[index];
-    copy[index] = copy[targetIndex];
-    copy[targetIndex] = temp;
-    return copy;
-  };
-
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Header Card */}
@@ -128,6 +202,7 @@ export const PageHomeCmsView: React.FC = () => {
       {/* Sub-Tabs Navigation */}
       <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
         {[
+          { id: 'slider', label: `★ Top Banner Slider (${topSlider.slides?.length || 0})` },
           { id: 'hero', label: '1. Hero & Secondary Slides' },
           { id: 'metrics', label: '2. Trust Metrics Strip' },
           { id: 'why', label: '3. Why Choose Pillars' },
@@ -148,6 +223,339 @@ export const PageHomeCmsView: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {/* SUB-TAB 0: TOP SLIDER BANNER */}
+      {activeSubTab === 'slider' && (
+        <div className="space-y-6 text-xs">
+          {/* Top Save Bar */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#16A6A3]" />
+                <span>Top Header Slider Banner CMS</span>
+              </h2>
+              <p className="text-xs text-slate-500">
+                Manage the high-visibility promotional slider situated above the main header. All changes synchronize directly to Supabase.
+              </p>
+            </div>
+            <button
+              onClick={handleSaveTopSlider}
+              className="px-4 py-2 bg-[#16A6A3] hover:bg-teal-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save Slider Settings</span>
+            </button>
+          </div>
+
+          {/* Global Slider Configuration */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-[#16A6A3]" />
+              <span>Global Display &amp; Autoplay Behavior</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Enable Globally */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-slate-900">Show Slider Banner</div>
+                  <div className="text-[11px] text-slate-500">Display above the public navigation header</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={topSlider.enabled !== false}
+                  onChange={(e) =>
+                    setTopSlider({ ...topSlider, enabled: e.target.checked })
+                  }
+                  className="w-5 h-5 text-[#16A6A3] rounded cursor-pointer"
+                />
+              </div>
+
+              {/* Autoplay Toggle */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-slate-900">Automatic Slide Rotation</div>
+                  <div className="text-[11px] text-slate-500">Auto-transition between slides on timer</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={topSlider.autoplay !== false}
+                  onChange={(e) =>
+                    setTopSlider({ ...topSlider, autoplay: e.target.checked })
+                  }
+                  className="w-5 h-5 text-[#16A6A3] rounded cursor-pointer"
+                />
+              </div>
+
+              {/* Autoplay Interval */}
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                <label className="block font-bold text-slate-900 mb-1">Rotation Interval</label>
+                <select
+                  value={topSlider.autoplayIntervalMs || 6000}
+                  onChange={(e) =>
+                    setTopSlider({
+                      ...topSlider,
+                      autoplayIntervalMs: Number(e.target.value),
+                    })
+                  }
+                  className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold"
+                >
+                  <option value={4000}>4 Seconds (Fast)</option>
+                  <option value={6000}>6 Seconds (Balanced - Recommended)</option>
+                  <option value={8000}>8 Seconds (Relaxed)</option>
+                  <option value={10000}>10 Seconds (Slow)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Slides List & Builder */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-[#16A6A3]" />
+                  <span>Slides Content ({topSlider.slides?.length || 0} Slides)</span>
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  Each slide can highlight a distinct clinical metric, AR recovery guarantee, or practice workflow.
+                </p>
+              </div>
+              <button
+                onClick={handleAddSlide}
+                className="px-3.5 py-1.5 bg-[#12304A] hover:bg-[#16A6A3] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Slide</span>
+              </button>
+            </div>
+
+            {(!topSlider.slides || topSlider.slides.length === 0) ? (
+              <div className="p-8 text-center border-2 border-dashed border-slate-200 rounded-xl text-slate-400">
+                <p>No slides created yet. Click "Add Slide" above to create your first announcement slide.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {topSlider.slides.map((slide, index) => (
+                  <div
+                    key={slide.id}
+                    className={`p-5 rounded-xl border transition-all ${
+                      slide.enabled !== false
+                        ? 'border-slate-300 bg-slate-50/70 shadow-xs'
+                        : 'border-slate-200 bg-slate-100/60 opacity-70'
+                    }`}
+                  >
+                    {/* Header Row */}
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-[#12304A] text-white text-[11px] font-bold flex items-center justify-center">
+                          {index + 1}
+                        </span>
+                        <span className="font-bold text-slate-900 text-xs">
+                          {slide.title || 'Untitled Slide'}
+                        </span>
+                        {slide.enabled !== false ? (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold">
+                            Disabled
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Controls */}
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleMoveSlide(index, 'up')}
+                          disabled={index === 0}
+                          className="p-1 rounded bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-30 cursor-pointer"
+                          title="Move Slide Up"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleMoveSlide(index, 'down')}
+                          disabled={index === (topSlider.slides?.length || 0) - 1}
+                          className="p-1 rounded bg-white border border-slate-200 text-slate-600 hover:text-slate-900 disabled:opacity-30 cursor-pointer"
+                          title="Move Slide Down"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleUpdateSlide(slide.id, {
+                              enabled: slide.enabled === false,
+                            })
+                          }
+                          className={`px-2.5 py-1 rounded text-[11px] font-bold border transition-colors cursor-pointer ${
+                            slide.enabled !== false
+                              ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+                              : 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100'
+                          }`}
+                        >
+                          {slide.enabled !== false ? 'Disable' : 'Enable'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSlide(slide.id)}
+                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                          title="Delete Slide"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Slide Fields Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Badge Pill */}
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">
+                          Badge Pill (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={slide.badge || ''}
+                          onChange={(e) =>
+                            handleUpdateSlide(slide.id, { badge: e.target.value })
+                          }
+                          className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs"
+                          placeholder="e.g. 98.4% Clean Claim Acceptance"
+                        />
+                      </div>
+
+                      {/* Main Title */}
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">
+                          Slide Headline
+                        </label>
+                        <input
+                          type="text"
+                          value={slide.title}
+                          onChange={(e) =>
+                            handleUpdateSlide(slide.id, { title: e.target.value })
+                          }
+                          className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-900"
+                          placeholder="Headline text"
+                        />
+                      </div>
+
+                      {/* Description */}
+                      <div className="md:col-span-2">
+                        <label className="block font-bold text-slate-700 mb-1">
+                          Slide Subtitle / Description
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={slide.description}
+                          onChange={(e) =>
+                            handleUpdateSlide(slide.id, { description: e.target.value })
+                          }
+                          className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs leading-relaxed"
+                          placeholder="Clear description of the feature or clinical advantage"
+                        />
+                      </div>
+
+                      {/* CTA Text */}
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">
+                          CTA Button Label
+                        </label>
+                        <input
+                          type="text"
+                          value={slide.ctaText}
+                          onChange={(e) =>
+                            handleUpdateSlide(slide.id, { ctaText: e.target.value })
+                          }
+                          className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold"
+                          placeholder="e.g. Claim Free 10-Point Audit"
+                        />
+                      </div>
+
+                      {/* CTA Link */}
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">
+                          CTA Destination Link
+                        </label>
+                        <select
+                          value={slide.ctaLink}
+                          onChange={(e) =>
+                            handleUpdateSlide(slide.id, { ctaLink: e.target.value })
+                          }
+                          className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-medium"
+                        >
+                          <option value="contact">Contact &amp; Audit Modal</option>
+                          <option value="solutions">Solutions &amp; 6-Stage SOP</option>
+                          <option value="pricing">Pricing &amp; ROI Calculator</option>
+                          <option value="about">About Us &amp; Leadership</option>
+                          <option value="blog">Blog &amp; Clinical Guides</option>
+                          <option value="home">Home Page</option>
+                        </select>
+                      </div>
+
+                      {/* Image Thumbnail URL */}
+                      <div className="md:col-span-2">
+                        <label className="block font-bold text-slate-700 mb-1">
+                          Thumbnail / Preview Image URL (Optional)
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="text"
+                            value={slide.image || ''}
+                            onChange={(e) =>
+                              handleUpdateSlide(slide.id, { image: e.target.value })
+                            }
+                            className="flex-1 p-2 bg-white border border-slate-300 rounded-lg text-xs"
+                            placeholder="https://images.unsplash.com/... or Supabase storage URL"
+                          />
+                          {slide.image && (
+                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-300 shrink-0">
+                              <img
+                                src={slide.image}
+                                alt="Preview"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Live Preview Card */}
+                    <div className="mt-4 p-3 bg-gradient-to-r from-[#00101e] via-[#001b31] to-[#042842] rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-3 border border-slate-800">
+                      <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+                        {slide.image && (
+                          <img
+                            src={slide.image}
+                            alt=""
+                            className="w-9 h-9 rounded-md object-cover border border-slate-700 shrink-0"
+                          />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            {slide.badge && (
+                              <span className="px-1.5 py-0.2 bg-[#12304A] border border-[#7EF5F1]/30 text-[#7EF5F1] text-[9px] font-mono font-bold rounded">
+                                {slide.badge}
+                              </span>
+                            )}
+                            <span className="text-[9px] text-slate-400 font-mono">Live Preview</span>
+                          </div>
+                          <div className="text-xs font-bold truncate text-white">{slide.title || 'Slide Title'}</div>
+                          <div className="text-[10px] text-slate-300 truncate">{slide.description}</div>
+                        </div>
+                      </div>
+                      <div className="px-3 py-1 rounded-full bg-[#006A68] text-white text-[11px] font-bold shrink-0">
+                        {slide.ctaText || 'Learn More'} &rarr;
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* SUB-TAB 1: HERO SECTION */}
       {activeSubTab === 'hero' && (
