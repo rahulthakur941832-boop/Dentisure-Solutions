@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useCms } from '../context/CmsContext';
 import { LeadSubmission, ResourceArticle, LegalDocument } from '../types';
+import { RichBlogEditor } from './RichBlogEditor';
+import { AiAssistantButton } from './AiAssistantButton';
 import {
   X,
   Lock,
@@ -240,10 +242,6 @@ export const AdminPanel: React.FC = () => {
                 <h3 className="text-sm sm:text-base font-bold text-white">
                   DentiSure Executive CMS &amp; RCM Portal
                 </h3>
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] uppercase font-mono bg-teal-900/80 text-teal-200 px-2 py-0.5 rounded border border-teal-700/50">
-                  <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
-                  Live Sync
-                </span>
               </div>
               <p className="text-[11px] text-slate-400">
                 Logged in as: <span className="text-teal-300 font-semibold">{adminUser?.name || 'Nisha Yadav'}</span> ({adminUser?.email})
@@ -1119,21 +1117,30 @@ export const AdminPanel: React.FC = () => {
               {/* Edit Blog Modal */}
               {isEditingBlog && blogFormData && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-                  <div className="bg-white rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl border border-slate-200">
+                  <div className="bg-white rounded-3xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl border border-slate-200">
                     <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                       <h4 className="text-base font-bold text-[#12304A]">
                         {cmsData.blog.some(b => b.id === blogFormData.id) ? 'Edit Article' : 'Create Article'}
                       </h4>
                       <button
                         onClick={() => setIsEditingBlog(false)}
-                        className="p-1 text-slate-400 hover:text-slate-700"
+                        className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
                       >
                         <X className="w-5 h-5" />
                       </button>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Article Title</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-bold text-slate-700 uppercase">Article Title</label>
+                        <AiAssistantButton
+                          type="blog_title"
+                          currentText={blogFormData.title}
+                          onApply={(newTitle) => setBlogFormData({ ...blogFormData, title: newTitle })}
+                          label="✨ AI Title (Demo)"
+                          compact
+                        />
+                      </div>
                       <input
                         type="text"
                         value={blogFormData.title}
@@ -1183,7 +1190,16 @@ export const AdminPanel: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Short Excerpt</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-bold text-slate-700 uppercase">Short Excerpt / Summary</label>
+                        <AiAssistantButton
+                          type="description"
+                          currentText={blogFormData.snippet}
+                          onApply={(newSnippet) => setBlogFormData({ ...blogFormData, snippet: newSnippet })}
+                          label="✨ AI Excerpt (Demo)"
+                          compact
+                        />
+                      </div>
                       <textarea
                         rows={2}
                         value={blogFormData.snippet}
@@ -1193,19 +1209,21 @@ export const AdminPanel: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                        Content (Paragraphs separated by line breaks)
-                      </label>
-                      <textarea
-                        rows={6}
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-bold text-slate-700 uppercase">
+                          Article Content (WordPress-Grade Editor)
+                        </label>
+                      </div>
+                      <RichBlogEditor
                         value={blogFormData.content.join('\n\n')}
-                        onChange={(e) =>
+                        onChange={(newContent) =>
                           setBlogFormData({
                             ...blogFormData,
-                            content: e.target.value.split('\n\n').filter(Boolean),
+                            content: newContent.split('\n\n').filter(Boolean),
                           })
                         }
-                        className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-sans"
+                        title={blogFormData.title}
+                        topic={blogFormData.category}
                       />
                     </div>
 
@@ -1247,7 +1265,7 @@ export const AdminPanel: React.FC = () => {
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <h4 className="text-sm font-bold text-[#12304A] flex items-center gap-2">
                     <Shield className="w-4 h-4 text-[#16A6A3]" />
-                    <span>Legal Documents CMS (Terms, Privacy &amp; HIPAA)</span>
+                    <span>Legal Documents CMS (Terms, Privacy &amp; Compliance)</span>
                   </h4>
                   <span className="text-xs text-slate-500">Live on /terms, /privacy, /hipaa</span>
                 </div>
@@ -1636,7 +1654,7 @@ export const AdminPanel: React.FC = () => {
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 font-medium">
               <span className={`w-2 h-2 rounded-full ${cloudStatus?.isConfigured ? 'bg-emerald-500' : 'bg-teal-500'}`}></span>
-              Live Sync: {cloudStatus?.isConfigured ? 'Cloud Database Connected' : 'Auto-Sync Active'}
+              Status: {cloudStatus?.isConfigured ? 'Cloud Database Connected' : 'Auto-Save Ready'}
             </span>
             <span className="hidden sm:inline text-slate-300">|</span>
             <span className="hidden sm:inline">Engine: {cloudStatus?.databaseProvider || 'Universal Cloud / Serverless'}</span>

@@ -1,4 +1,4 @@
-import { uploadCloudAsset } from '../server/cloudCms.ts';
+import { uploadCloudAsset } from '../server/cloudCms';
 import path from 'path';
 
 export default async function handler(req: any, res: any) {
@@ -15,9 +15,16 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const rawData = req.body?.image || req.body?.data;
+    let body = req.body;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch (_) {}
+    }
+
+    const rawData = body?.image || body?.data;
     if (!rawData || typeof rawData !== 'string') {
-      return res.status(400).json({ error: 'No image data provided in request body' });
+      return res.status(400).json({ success: false, error: 'No image data provided in request body' });
     }
 
     let base64Data = rawData;
@@ -34,8 +41,8 @@ export default async function handler(req: any, res: any) {
       else if (detectedMime === 'image/webp') detectedExt = 'webp';
       else if (detectedMime === 'image/gif') detectedExt = 'gif';
       else if (detectedMime === 'image/x-icon' || detectedMime === 'image/vnd.microsoft.icon') detectedExt = 'ico';
-    } else if (req.body?.filename) {
-      const ext = path.extname(req.body.filename).toLowerCase().replace('.', '');
+    } else if (body?.filename) {
+      const ext = path.extname(body.filename).toLowerCase().replace('.', '');
       if (['png', 'jpg', 'jpeg', 'svg', 'webp', 'gif', 'ico'].includes(ext)) {
         detectedExt = ext === 'jpeg' ? 'jpg' : ext;
       }
@@ -43,11 +50,11 @@ export default async function handler(req: any, res: any) {
 
     const buffer = Buffer.from(base64Data, 'base64');
     if (buffer.length === 0) {
-      return res.status(400).json({ error: 'Invalid or empty image buffer' });
+      return res.status(400).json({ success: false, error: 'Invalid or empty image buffer' });
     }
 
-    const tag = req.body?.tag || 'logo';
-    const filename = req.body?.filename || `upload.${detectedExt}`;
+    const tag = body?.tag || 'logo';
+    const filename = body?.filename || `upload.${detectedExt}`;
 
     const uploadResult = await uploadCloudAsset(buffer, filename, detectedMime, tag);
 
@@ -55,7 +62,8 @@ export default async function handler(req: any, res: any) {
   } catch (err: any) {
     console.error('[API /api/upload Error]:', err);
     return res.status(500).json({
-      error: 'Failed to upload image to cloud storage: ' + (err.message || 'Unknown error'),
+      success: false,
+      error: 'Failed to upload image to Supabase Storage: ' + (err.message || 'Unknown error'),
     });
   }
 }

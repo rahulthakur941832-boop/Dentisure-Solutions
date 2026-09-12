@@ -45,10 +45,10 @@ export const PageLegalCmsView: React.FC = () => {
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#16A6A3] bg-teal-50 px-2 py-0.5 rounded-md">
               Legal &amp; Compliance
             </span>
-            <h1 className="text-xl font-bold text-slate-900">Legal Documents &amp; HIPAA Governance</h1>
+            <h1 className="text-xl font-bold text-slate-900">Legal Documents &amp; Policy Governance</h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Maintain public-facing HIPAA BAA disclosures, Terms of Master Service Agreements, and Data Privacy Policies.
+            Maintain public-facing Privacy disclosures, Terms of Master Service Agreements, and Data Protection Policies.
           </p>
         </div>
 
@@ -72,7 +72,7 @@ export const PageLegalCmsView: React.FC = () => {
       {/* Document Selector Pills */}
       <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
         {[
-          { id: 'hipaa', label: '1. HIPAA & BAA Protocol', icon: ShieldCheck },
+          { id: 'hipaa', label: '1. Privacy & BAA Protocol', icon: ShieldCheck },
           { id: 'terms', label: '2. Terms of Master Service Agreement', icon: FileText },
           { id: 'privacy', label: '3. Data Privacy Policy', icon: Lock },
         ].map((tab) => {

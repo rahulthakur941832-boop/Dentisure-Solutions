@@ -147,7 +147,7 @@ export const AdminLoginModal: React.FC = () => {
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
             <span className="flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-              HIPAA &amp; Encrypted Session
+              Encrypted Admin Session
             </span>
             <span className="font-mono">v3.2 Secure</span>
           </div>

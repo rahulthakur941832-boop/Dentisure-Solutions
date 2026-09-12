@@ -15,6 +15,8 @@ import {
   Save,
 } from 'lucide-react';
 import { ResourceArticle } from '../../types';
+import { RichBlogEditor } from '../../components/RichBlogEditor';
+import { AiAssistantButton } from '../../components/AiAssistantButton';
 
 export const PageBlogCmsView: React.FC = () => {
   const { cmsData, addBlogPost, updateBlogPost, deleteBlogPost } = useCms();
@@ -176,7 +178,7 @@ export const PageBlogCmsView: React.FC = () => {
       {/* Edit / Create Article Modal */}
       {editingArticle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-150">
             <div className="bg-[#12304A] text-white px-6 py-4 flex items-center justify-between">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-teal-300" />
@@ -190,9 +192,18 @@ export const PageBlogCmsView: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSaveModal} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
+            <form onSubmit={handleSaveModal} className="p-6 space-y-4 max-h-[85vh] overflow-y-auto text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Article Title *</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-bold text-slate-700">Article Title *</label>
+                  <AiAssistantButton
+                    type="blog_title"
+                    currentText={editingArticle.title}
+                    onApply={(newTitle) => setEditingArticle({ ...editingArticle, title: newTitle })}
+                    label="✨ AI Title (Demo)"
+                    compact
+                  />
+                </div>
                 <input
                   type="text"
                   required
@@ -233,7 +244,16 @@ export const PageBlogCmsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Snippet / Meta Summary</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-bold text-slate-700">Snippet / Meta Summary</label>
+                  <AiAssistantButton
+                    type="description"
+                    currentText={editingArticle.snippet}
+                    onApply={(newSnippet) => setEditingArticle({ ...editingArticle, snippet: newSnippet })}
+                    label="✨ AI Excerpt (Demo)"
+                    compact
+                  />
+                </div>
                 <textarea
                   rows={2}
                   value={editingArticle.snippet}
@@ -258,12 +278,21 @@ export const PageBlogCmsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Full Markdown Article Content</label>
-                <textarea
-                  rows={8}
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-bold text-slate-700">
+                    Article Body &amp; Content (WordPress Rich Editor)
+                  </label>
+                </div>
+                <RichBlogEditor
                   value={Array.isArray(editingArticle.content) ? editingArticle.content.join('\n\n') : (editingArticle.content || '')}
-                  onChange={(e) => setEditingArticle({ ...editingArticle, content: e.target.value.split('\n\n') })}
-                  className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl font-mono text-[11px] leading-relaxed"
+                  onChange={(newContent) =>
+                    setEditingArticle({
+                      ...editingArticle,
+                      content: newContent.split('\n\n').filter(Boolean),
+                    })
+                  }
+                  title={editingArticle.title}
+                  topic={editingArticle.category}
                 />
               </div>
 

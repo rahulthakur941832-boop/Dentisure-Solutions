@@ -11,27 +11,22 @@ import {
 import { INITIAL_CMS_DATA } from '../data/initialCmsData';
 import { INITIAL_LEADS } from '../data/contentData';
 
-const CMS_STORAGE_KEY = 'dentisure_cms_content_v4';
 const LEADS_STORAGE_KEY = 'dentisure_leads_data_v4';
 const AUTH_STORAGE_KEY = 'dentisure_admin_session_v4';
 const PASSWORD_STORAGE_KEY = 'dentisure_admin_pass_v4';
-
-const DEFAULT_ADMIN: AdminUser = {
-  name: 'Nisha Yadav',
-  email: 'admin@dentisure.com',
-  role: 'Senior Director of Dental RCM & Compliance',
-};
 
 const DEFAULT_PASS = 'admin123';
 
 interface CmsContextType {
   cmsData: CmsData;
+  isCmsLoading: boolean;
+  refreshFromCloud: () => Promise<void>;
   updateSection: <K extends keyof CmsData>(
     section: K,
     updater: Partial<CmsData[K]> | ((prev: CmsData[K]) => CmsData[K])
   ) => void;
   updateCmsData: (newData: CmsData) => void;
-  resetToDefaults: () => void;
+  resetToDefaults: () => Promise<void>;
   exportJsonBackup: () => void;
   importJsonBackup: (jsonString: string) => { success: boolean; error?: string };
 
@@ -85,65 +80,18 @@ interface CmsContextType {
 const CmsContext = createContext<CmsContextType | undefined>(undefined);
 
 export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Load CMS data with fallback to defaults
-  const [cmsData, setCmsData] = useState<CmsData>(() => {
-    try {
-      const saved = localStorage.getItem(CMS_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return {
-          ...INITIAL_CMS_DATA,
-          ...parsed,
-          brand: {
-            ...INITIAL_CMS_DATA.brand,
-            ...(parsed.brand || {}),
-            // Ensure no legacy Austin / US placeholder remains if previously saved
-            address: parsed.brand?.address?.includes('Austin') ? INITIAL_CMS_DATA.brand.address : (parsed.brand?.address || INITIAL_CMS_DATA.brand.address),
-          },
-          header: {
-            ...INITIAL_CMS_DATA.header,
-            ...(parsed.header || {}),
-            topNoticeBadge: undefined, // remove Live Operations
-            topNotice: (parsed.header?.topNotice && !parsed.header.topNotice.includes('50 US States'))
-              ? parsed.header.topNotice
-              : INITIAL_CMS_DATA.header.topNotice,
-            navItems: (parsed.header?.navItems && parsed.header.navItems.length > 0)
-              ? parsed.header.navItems
-              : INITIAL_CMS_DATA.header.navItems,
-            logoUrl: parsed.header?.logoUrl || parsed.branding?.headerLogoUrl || '',
-            logoHeight: parsed.header?.logoHeight || parsed.branding?.headerLogoHeight || 44,
-          },
-          footer: {
-            ...INITIAL_CMS_DATA.footer,
-            ...(parsed.footer || {}),
-            agencyCredit: parsed.footer?.agencyCredit || INITIAL_CMS_DATA.footer.agencyCredit,
-            logoUrl: parsed.footer?.logoUrl || parsed.branding?.footerLogoUrl || '',
-            logoHeight: parsed.footer?.logoHeight || parsed.branding?.footerLogoHeight || 40,
-          },
-          branding: {
-            ...INITIAL_CMS_DATA.branding,
-            ...(parsed.branding || {}),
-            headerLogoUrl: parsed.branding?.headerLogoUrl || parsed.header?.logoUrl || '',
-            footerLogoUrl: parsed.branding?.footerLogoUrl || parsed.footer?.logoUrl || '',
-          },
-        };
-      }
-    } catch (e) {
-      console.warn('Failed to load CMS data from localStorage:', e);
-    }
-    return INITIAL_CMS_DATA;
-  });
+  // Supabase is the SINGLE SOURCE OF TRUTH.
+  // We strictly avoid reading initial state from localStorage to prevent stale browser overrides.
+  const [cmsData, setCmsData] = useState<CmsData>(INITIAL_CMS_DATA);
+  const [isCmsLoading, setIsCmsLoading] = useState<boolean>(true);
+  const [isSyncingServer, setIsSyncingServer] = useState<boolean>(false);
 
   // Leads state
   const [leads, setLeads] = useState<LeadSubmission[]>(() => {
     try {
       const saved = localStorage.getItem(LEADS_STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Failed to load leads from localStorage:', e);
-    }
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
     return INITIAL_LEADS;
   });
 
@@ -151,108 +99,103 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [adminUser, setAdminUser] = useState<AdminUser | null>(() => {
     try {
       const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Failed to load auth session:', e);
-    }
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
     return null;
   });
 
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState<boolean>(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
-  const [isSyncingServer, setIsSyncingServer] = useState<boolean>(false);
 
-  const isInitialMount = React.useRef(true);
-  const serverLoadedRef = React.useRef(false);
-
-  // Fetch authoritative server/cloud CMS data on mount so ALL browsers & incognito tabs see identical live data!
-  useEffect(() => {
-    let isMounted = true;
-    async function loadAuthoritativeServerCms() {
-      try {
-        // Cache-busting timestamp + headers guarantee fresh cloud data in Incognito & new devices
-        const response = await fetch(`/api/cms?t=${Date.now()}`, {
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            Pragma: 'no-cache',
-          },
-        });
-        if (response.ok) {
-          const json = await response.json();
-          if (json?.data && isMounted) {
-            const serverData = json.data;
-            serverLoadedRef.current = true;
-            console.log('[CMS Context] Loaded authoritative cloud CMS data from provider:', json.provider);
-            
-            // Server data from Cloud Database is the SINGLE SOURCE OF TRUTH
-            setCmsData(() => {
-              const merged: CmsData = {
-                ...INITIAL_CMS_DATA,
-                ...serverData,
-                header: {
-                  ...INITIAL_CMS_DATA.header,
-                  ...(serverData?.header || {}),
-                  logoUrl:
-                    serverData?.header?.logoUrl !== undefined
-                      ? serverData.header.logoUrl
-                      : serverData?.branding?.headerLogoUrl || '',
-                  logoHeight:
-                    serverData?.header?.logoHeight ||
-                    serverData?.branding?.headerLogoHeight ||
-                    44,
-                },
-                footer: {
-                  ...INITIAL_CMS_DATA.footer,
-                  ...(serverData?.footer || {}),
-                  logoUrl:
-                    serverData?.footer?.logoUrl !== undefined
-                      ? serverData.footer.logoUrl
-                      : serverData?.branding?.footerLogoUrl || '',
-                  logoHeight:
-                    serverData?.footer?.logoHeight ||
-                    serverData?.branding?.footerLogoHeight ||
-                    40,
-                },
-                branding: {
-                  ...INITIAL_CMS_DATA.branding,
-                  ...(serverData?.branding || {}),
-                  headerLogoUrl:
-                    serverData?.branding?.headerLogoUrl || serverData?.header?.logoUrl || '',
-                  footerLogoUrl:
-                    serverData?.branding?.footerLogoUrl || serverData?.footer?.logoUrl || '',
-                },
-              };
-              try {
-                localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(merged));
-              } catch (_) {}
-              return merged;
-            });
-          } else {
-            serverLoadedRef.current = true;
-          }
-        }
-      } catch (err) {
-        console.warn('[CMS Context] Could not reach /api/cms, continuing with local cache:', err);
-        serverLoadedRef.current = true;
-      }
-    }
-    loadAuthoritativeServerCms();
-    return () => {
-      isMounted = false;
+  // Helper to merge database payload cleanly with fallback safety
+  const mergeWithAuthoritativePayload = (serverData: any): CmsData => {
+    return {
+      ...INITIAL_CMS_DATA,
+      ...serverData,
+      brand: {
+        ...INITIAL_CMS_DATA.brand,
+        ...(serverData?.brand || {}),
+      },
+      header: {
+        ...INITIAL_CMS_DATA.header,
+        ...(serverData?.header || {}),
+        logoUrl:
+          serverData?.header?.logoUrl !== undefined
+            ? serverData.header.logoUrl
+            : serverData?.branding?.headerLogoUrl || '',
+        logoHeight:
+          serverData?.header?.logoHeight ||
+          serverData?.branding?.headerLogoHeight ||
+          44,
+      },
+      footer: {
+        ...INITIAL_CMS_DATA.footer,
+        ...(serverData?.footer || {}),
+        logoUrl:
+          serverData?.footer?.logoUrl !== undefined
+            ? serverData.footer.logoUrl
+            : serverData?.branding?.footerLogoUrl || '',
+        logoHeight:
+          serverData?.footer?.logoHeight ||
+          serverData?.branding?.footerLogoHeight ||
+          40,
+      },
+      branding: {
+        ...INITIAL_CMS_DATA.branding,
+        ...(serverData?.branding || {}),
+        headerLogoUrl:
+          serverData?.branding?.headerLogoUrl || serverData?.header?.logoUrl || '',
+        footerLogoUrl:
+          serverData?.branding?.footerLogoUrl || serverData?.footer?.logoUrl || '',
+      },
     };
+  };
+
+  // Authoritative cloud fetch: Directly queries Supabase on mount
+  const refreshFromCloud = async () => {
+    try {
+      setIsCmsLoading(true);
+      const response = await fetch(`/api/cms?t=${Date.now()}`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      });
+
+      if (response.ok) {
+        const json = await response.json();
+        if (json?.data && typeof json.data === 'object' && json.data.brand) {
+          console.log('[CMS Context] Single Source of Truth loaded from Supabase:', json.provider);
+          const authoritativeData = mergeWithAuthoritativePayload(json.data);
+          setCmsData(authoritativeData);
+        } else if (json?.provider === 'supabase-empty' || !json?.data || !json?.data?.brand) {
+          // If Supabase table was unseeded, seed it now with default data
+          console.log('[CMS Context] Supabase empty, seeding default data...');
+          await fetch('/api/cms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: INITIAL_CMS_DATA }),
+          });
+          setCmsData(INITIAL_CMS_DATA);
+        }
+      } else {
+        console.warn('[CMS Context] /api/cms responded with status:', response.status);
+      }
+    } catch (err) {
+      console.error('[CMS Context] Error fetching authoritative CMS from Supabase:', err);
+    } finally {
+      setIsCmsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshFromCloud();
   }, []);
 
-  // Sync CMS data to localStorage and dynamic document SEO
+  // Update dynamic document SEO whenever cmsData changes
   useEffect(() => {
-    try {
-      localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(cmsData));
-    } catch (e) {
-      console.warn('Failed to save CMS data to localStorage:', e);
-    }
-
-    // Live update browser title and meta tags based on SEO CMS
     if (cmsData.seo?.siteTitle) {
       document.title = cmsData.seo.siteTitle;
     }
@@ -262,69 +205,11 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, [cmsData]);
 
-  // Auto-sync debounced (1500ms) to server whenever cmsData changes after server initial load
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    if (!serverLoadedRef.current) {
-      return;
-    }
-    const timer = setTimeout(() => {
-      fetch('/api/cms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: cmsData }),
-      }).catch((e) => console.warn('[CMS Context] Auto-sync to server error:', e));
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [cmsData]);
-
-  // Save explicitly to authoritative Cloud Database storage
-  const saveToServer = async (
-    dataToSave?: CmsData
-  ): Promise<{ success: boolean; error?: string; provider?: string }> => {
-    const payload = dataToSave || cmsData;
-    setIsSyncingServer(true);
-    try {
-      const res = await fetch('/api/cms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        body: JSON.stringify({ data: payload }),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (res.ok && json.success !== false) {
-        console.log('[CMS Context] Saved to cloud database successfully:', json);
-        try {
-          localStorage.setItem(CMS_STORAGE_KEY, JSON.stringify(payload));
-        } catch (_) {}
-        return { success: true, provider: json.provider };
-      } else {
-        return {
-          success: false,
-          error: json.error || json.message || 'Server returned an error status',
-        };
-      }
-    } catch (err: any) {
-      console.error('[CMS Context] Network error saving to cloud database:', err);
-      return { success: false, error: err.message || 'Network error' };
-    } finally {
-      setIsSyncingServer(false);
-    }
-  };
-
   // Sync Leads to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(leads));
-    } catch (e) {
-      console.warn('Failed to save leads to localStorage:', e);
-    }
+    } catch (_) {}
   }, [leads]);
 
   // Sync Auth session to localStorage
@@ -335,17 +220,64 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       } else {
         localStorage.removeItem(AUTH_STORAGE_KEY);
       }
-    } catch (e) {
-      console.warn('Failed to update auth session in localStorage:', e);
-    }
+    } catch (_) {}
   }, [adminUser]);
+
+  // Save explicitly to authoritative Supabase Cloud Database storage
+  const saveToServer = async (
+    dataToSave?: CmsData
+  ): Promise<{ success: boolean; error?: string; provider?: string }> => {
+    const payload = dataToSave || cmsData;
+    setIsSyncingServer(true);
+    try {
+      const res = await fetch('/api/cms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+        body: JSON.stringify({ data: payload }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.success !== false) {
+        console.log('[CMS Context] Saved to Supabase successfully:', json);
+        const savedData = json.data ? mergeWithAuthoritativePayload(json.data) : payload;
+        setCmsData(savedData);
+        return { success: true, provider: json.provider || 'supabase' };
+      } else {
+        return {
+          success: false,
+          error: json.error || json.message || 'Supabase returned an error status',
+        };
+      }
+    } catch (err: any) {
+      console.error('[CMS Context] Network error saving to Supabase:', err);
+      return { success: false, error: err.message || 'Network error' };
+    } finally {
+      setIsSyncingServer(false);
+    }
+  };
+
+  // Helper to update React state AND immediately persist to Supabase
+  const persistAndSet = (updater: (prev: CmsData) => CmsData) => {
+    setCmsData((prev) => {
+      const updated = updater(prev);
+      // Immediately sync with Supabase in background
+      fetch('/api/cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+        body: JSON.stringify({ data: updated }),
+      }).catch((e) => console.error('[CMS Context] Auto-sync to Supabase error:', e));
+      return updated;
+    });
+  };
 
   // Section updater
   const updateSection = <K extends keyof CmsData>(
     section: K,
     updater: Partial<CmsData[K]> | ((prev: CmsData[K]) => CmsData[K])
   ) => {
-    setCmsData((prev) => {
+    persistAndSet((prev) => {
       const currentVal = prev[section];
       let newVal: CmsData[K];
       if (typeof updater === 'function') {
@@ -363,20 +295,29 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateCmsData = (newData: CmsData) => {
-    setCmsData(newData);
+    persistAndSet(() => newData);
   };
 
-  const resetToDefaults = () => {
-    setCmsData(INITIAL_CMS_DATA);
-    localStorage.removeItem(CMS_STORAGE_KEY);
-    fetch('/api/cms/reset', { method: 'POST' }).catch((e) =>
-      console.warn('Failed to reset server CMS:', e)
-    );
+  const resetToDefaults = async () => {
+    try {
+      setIsSyncingServer(true);
+      const res = await fetch('/api/cms/reset', { method: 'POST' });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json.data) {
+        setCmsData(mergeWithAuthoritativePayload(json.data));
+      } else {
+        setCmsData(INITIAL_CMS_DATA);
+      }
+    } catch (_) {
+      setCmsData(INITIAL_CMS_DATA);
+    } finally {
+      setIsSyncingServer(false);
+    }
   };
 
   const exportJsonBackup = () => {
     const backupObj = {
-      version: '3.0',
+      version: '4.0',
       exportedAt: new Date().toISOString(),
       cmsData,
       leads,
@@ -397,13 +338,17 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     try {
       const parsed = JSON.parse(jsonString);
       if (parsed.cmsData) {
-        setCmsData(parsed.cmsData);
+        const merged = mergeWithAuthoritativePayload(parsed.cmsData);
+        setCmsData(merged);
+        saveToServer(merged);
         if (Array.isArray(parsed.leads)) {
           setLeads(parsed.leads);
         }
         return { success: true };
       } else if (parsed.brand && parsed.hero) {
-        setCmsData(parsed as CmsData);
+        const merged = mergeWithAuthoritativePayload(parsed);
+        setCmsData(merged);
+        saveToServer(merged);
         return { success: true };
       }
       return { success: false, error: 'Unrecognized JSON structure. Missing CMS nodes.' };
@@ -482,21 +427,21 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Blog actions
   const addBlogPost = (post: ResourceArticle) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       blog: [post, ...prev.blog],
     }));
   };
 
   const updateBlogPost = (post: ResourceArticle) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       blog: prev.blog.map((p) => (p.id === post.id ? post : p)),
     }));
   };
 
   const deleteBlogPost = (id: string) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       blog: prev.blog.filter((p) => p.id !== id),
     }));
@@ -504,14 +449,14 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Media actions
   const addMediaItem = (item: MediaItem) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       mediaLibrary: [item, ...(prev.mediaLibrary || [])],
     }));
   };
 
   const updateMediaItem = (id: string, updates: Partial<MediaItem>) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       mediaLibrary: (prev.mediaLibrary || []).map((m) =>
         m.id === id ? { ...m, ...updates, updatedAt: new Date().toISOString().split('T')[0] } : m
@@ -520,7 +465,7 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const deleteMediaItem = (id: string) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       mediaLibrary: (prev.mediaLibrary || []).filter((m) => m.id !== id),
     }));
@@ -528,7 +473,7 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Legal document actions
   const updateLegalDoc = (type: 'terms' | 'privacy' | 'hipaa', doc: LegalDocument) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       legal: {
         ...prev.legal,
@@ -539,22 +484,24 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Header Navigation Actions
   const addHeaderNavItem = (item: Omit<HeaderNavItem, 'id'>) => {
-    const newItem: HeaderNavItem = {
-      ...item,
-      id: `nav-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      order: item.order ?? ((cmsData.header.navItems?.length || 0) + 1),
-    };
-    setCmsData((prev) => ({
-      ...prev,
-      header: {
-        ...prev.header,
-        navItems: [...(prev.header.navItems || []), newItem],
-      },
-    }));
+    persistAndSet((prev) => {
+      const newItem: HeaderNavItem = {
+        ...item,
+        id: `nav-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        order: item.order ?? ((prev.header.navItems?.length || 0) + 1),
+      };
+      return {
+        ...prev,
+        header: {
+          ...prev.header,
+          navItems: [...(prev.header.navItems || []), newItem],
+        },
+      };
+    });
   };
 
   const updateHeaderNavItem = (id: string, updates: Partial<HeaderNavItem>) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       header: {
         ...prev.header,
@@ -566,7 +513,7 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const deleteHeaderNavItem = (id: string) => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       header: {
         ...prev.header,
@@ -576,18 +523,17 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const reorderHeaderNavItems = (items: HeaderNavItem[]) => {
-    const reordered = items.map((item, idx) => ({ ...item, order: idx + 1 }));
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       header: {
         ...prev.header,
-        navItems: reordered,
+        navItems: items.map((item, idx) => ({ ...item, order: idx + 1 })),
       },
     }));
   };
 
   const resetHeaderNavItems = () => {
-    setCmsData((prev) => ({
+    persistAndSet((prev) => ({
       ...prev,
       header: {
         ...prev.header,
@@ -600,6 +546,8 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     <CmsContext.Provider
       value={{
         cmsData,
+        isCmsLoading,
+        refreshFromCloud,
         updateSection,
         updateCmsData,
         resetToDefaults,

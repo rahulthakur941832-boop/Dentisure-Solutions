@@ -14,7 +14,7 @@ import {
 import { ServicePillar } from '../../types';
 
 export const PageSolutionsCmsView: React.FC = () => {
-  const { cmsData, updateSection } = useCms();
+  const { cmsData, updateSection, saveToServer } = useCms();
   const [savedAlert, setSavedAlert] = useState(false);
 
   const [solutionsHero, setSolutionsHero] = useState(cmsData.solutionsPage);
@@ -31,12 +31,18 @@ export const PageSolutionsCmsView: React.FC = () => {
     setTimeout(() => setSavedAlert(false), 2500);
   };
 
-  const handleSaveAll = () => {
-    updateSection('solutionsPage', solutionsHero);
-    updateSection('services', {
+  const handleSaveAll = async () => {
+    const updatedServices = {
       title: servicesHeader.title,
       subtitle: servicesHeader.subtitle,
       pillars,
+    };
+    updateSection('solutionsPage', solutionsHero);
+    updateSection('services', updatedServices);
+    await saveToServer({
+      ...cmsData,
+      solutionsPage: solutionsHero,
+      services: updatedServices,
     });
     triggerSaveToast();
   };

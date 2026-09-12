@@ -153,7 +153,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onBackToSite }) 
                 </label>
                 <span className="text-slate-500 text-[11px] flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
-                  HIPAA Enforced
+                  Encrypted Session
                 </span>
               </div>
 

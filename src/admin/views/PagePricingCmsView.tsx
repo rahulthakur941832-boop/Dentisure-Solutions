@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export const PagePricingCmsView: React.FC = () => {
-  const { cmsData, updateSection } = useCms();
+  const { cmsData, updateSection, saveToServer } = useCms();
   const [savedAlert, setSavedAlert] = useState(false);
 
   const [pricingHeader, setPricingHeader] = useState({
@@ -34,12 +34,17 @@ export const PagePricingCmsView: React.FC = () => {
     setTimeout(() => setSavedAlert(false), 2500);
   };
 
-  const handleSaveAll = () => {
-    updateSection('pricing', {
+  const handleSaveAll = async () => {
+    const updatedPricing = {
       title: pricingHeader.title,
       subtitle: pricingHeader.subtitle,
       guaranteeText: pricingHeader.guaranteeText,
       tiers,
+    };
+    updateSection('pricing', updatedPricing);
+    await saveToServer({
+      ...cmsData,
+      pricing: updatedPricing,
     });
     triggerSaveToast();
   };

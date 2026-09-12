@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#12304A] px-2.5 py-0.5 text-[#7EF5F1] font-mono text-[11px] font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-[#7EF5F1] animate-pulse" />
-              <span>PAN-INDIA ADVISORY DESK: {cmsData.brand?.phone || '+91 98765 43210'}</span>
+              <span>PRACTICE ADVISORY DESK: {cmsData.brand?.phone || '+1 (111) 111-1111 (Demo)'}</span>
             </span>
           </div>
           <div className="hidden md:flex items-center gap-2 text-slate-400 text-[11px]">
@@ -129,11 +129,11 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Right Actions: Phone + Claim Free Revenue Audit Pill Button */}
         <div className="flex items-center gap-3">
           <a
-            href={`tel:${(cmsData.brand?.phone || '+919876543210').replace(/[^0-9+]/g, '')}`}
+            href={`tel:${(cmsData.brand?.phone || '1111111111').replace(/[^0-9+]/g, '')}`}
             className="hidden sm:flex items-center gap-1.5 text-[#001B31] font-mono text-xs font-semibold hover:text-[#006A68] transition-colors px-2 py-1"
           >
             <Phone className="w-4 h-4 text-[#006A68]" />
-            <span>{cmsData.brand?.phone || '+91 98765 43210'}</span>
+            <span>{cmsData.brand?.phone || '+1 (111) 111-1111 (Demo)'}</span>
           </a>
 
           <button
@@ -184,11 +184,11 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div className="pt-3 border-t border-slate-100 space-y-2">
               <a
-                href={`tel:${(cmsData.brand?.phone || '+919876543210').replace(/[^0-9+]/g, '')}`}
+                href={`tel:${(cmsData.brand?.phone || '1111111111').replace(/[^0-9+]/g, '')}`}
                 className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 text-primary font-mono text-xs font-semibold"
               >
                 <Phone className="w-3.5 h-3.5 text-[#006A68]" />
-                <span>{cmsData.brand?.phone || '+91 98765 43210'}</span>
+                <span>{cmsData.brand?.phone || '+1 (111) 111-1111 (Demo)'}</span>
               </a>
 
               <button

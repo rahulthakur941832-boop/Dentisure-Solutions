@@ -1,94 +1,103 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import path from 'path';
 
 /**
- * Universal Cloud Storage & Database Manager for DentiSure CMS
- * Supports:
- * 1. Supabase (PostgreSQL Database + Storage Bucket) - Primary for Vercel
- * 2. Cloudinary (Cloud Image & Asset CDN) - Optional image provider
- * 3. Local Ephemeral/Disk Fallback (For local dev and safety when env vars aren't provided)
+ * Universal Supabase Cloud Database & Storage Manager for DentiSure CMS
+ * Single Source of Truth:
+ * - PostgreSQL table: 'cms_content' (id: 'default', data: JSONB)
+ * - Storage Bucket: 'cms_assets' (Public CDN for logos and images)
  */
 
-// 1. Supabase Client Setup (Database + Storage)
+function getBestSupabaseKey(): string {
+  const candidates = [
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    process.env.SUPABASE_ANON_KEY,
+    process.env.SUPABASE_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    process.env.VITE_SUPABASE_ANON_KEY,
+  ].filter(Boolean) as string[];
+
+  // Priority 1: Check JWT token payload for role: "service_role"
+  for (const k of candidates) {
+    try {
+      const parts = k.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+        if (payload && payload.role === 'service_role') {
+          return k;
+        }
+      }
+    } catch (_) {}
+  }
+
+  // Priority 2: Fallback to first available key
+  return candidates[0] || '';
+}
+
 const supabaseUrl =
   process.env.SUPABASE_URL ||
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
   process.env.VITE_SUPABASE_URL ||
   '';
 
-const supabaseKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY ||
-  '';
-
 let supabaseClient: SupabaseClient | null = null;
-if (supabaseUrl && supabaseKey) {
-  try {
-    supabaseClient = createClient(supabaseUrl, supabaseKey, {
-      auth: { persistSession: false },
-    });
-    console.log('[Cloud CMS] Supabase client initialized for project:', supabaseUrl);
-  } catch (err) {
-    console.error('[Cloud CMS] Failed to initialize Supabase client:', err);
+
+export function getSupabaseClient(): SupabaseClient | null {
+  if (supabaseClient) return supabaseClient;
+  const key = getBestSupabaseKey();
+  if (supabaseUrl && key) {
+    try {
+      supabaseClient = createClient(supabaseUrl, key, {
+        auth: { persistSession: false },
+      });
+      console.log('[Cloud CMS] Supabase client initialized for:', supabaseUrl);
+      return supabaseClient;
+    } catch (err) {
+      console.error('[Cloud CMS] Failed to initialize Supabase client:', err);
+      return null;
+    }
   }
+  return null;
 }
 
-// 2. Cloudinary Setup (Alternative Image CDN)
-const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || '';
-const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY || '';
-const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET || '';
-
-let isCloudinaryConfigured = false;
-if (cloudinaryCloudName && cloudinaryApiKey && cloudinaryApiSecret) {
-  try {
-    cloudinary.config({
-      cloud_name: cloudinaryCloudName,
-      api_key: cloudinaryApiKey,
-      api_secret: cloudinaryApiSecret,
-      secure: true,
-    });
-    isCloudinaryConfigured = true;
-    console.log('[Cloud CMS] Cloudinary image storage initialized for cloud:', cloudinaryCloudName);
-  } catch (err) {
-    console.error('[Cloud CMS] Failed to configure Cloudinary:', err);
-  }
-}
-
-// 3. Local fallback directory
+// Local fallback path for initial seeding
 const dataDir = path.join(process.cwd(), 'data');
+const defaultCmsPath = path.join(dataDir, 'defaultCms.json');
 const localCmsPath = path.join(dataDir, 'cms-content.json');
 
-// In-memory cache for fast response and fallback
-let inMemoryCmsData: any = null;
-
-// Ensure local file can be loaded if exists
-if (fs.existsSync(localCmsPath)) {
-  try {
-    inMemoryCmsData = JSON.parse(fs.readFileSync(localCmsPath, 'utf8'));
-  } catch (_) {}
+function getDefaultFallbackData(): any {
+  if (fs.existsSync(defaultCmsPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(defaultCmsPath, 'utf8'));
+    } catch (_) {}
+  }
+  if (fs.existsSync(localCmsPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(localCmsPath, 'utf8'));
+    } catch (_) {}
+  }
+  return null;
 }
 
 /**
  * Report current Cloud Database & Storage status
  */
 export function getCloudStatus() {
-  const hasSupabase = Boolean(supabaseClient);
-  const hasCloudinary = isCloudinaryConfigured;
+  const client = getSupabaseClient();
+  const isConfigured = Boolean(client);
   return {
-    databaseProvider: hasSupabase ? 'Supabase (PostgreSQL)' : 'Local File / Memory (Vercel requires Supabase env vars)',
-    storageProvider: hasSupabase ? 'Supabase Storage Bucket (cms_assets)' : hasCloudinary ? 'Cloudinary CDN' : 'Local /uploads (Ephemeral on Vercel)',
-    isConfigured: hasSupabase || hasCloudinary,
-    supabaseConfigured: hasSupabase,
-    cloudinaryConfigured: hasCloudinary,
+    databaseProvider: isConfigured ? 'Supabase (PostgreSQL - cms_content)' : 'None (SUPABASE_URL / key missing)',
+    storageProvider: isConfigured ? 'Supabase Storage Bucket (cms_assets)' : 'None',
+    isConfigured,
+    supabaseConfigured: isConfigured,
+    cloudinaryConfigured: false,
   };
 }
 
 /**
- * Fetch authoritative CMS data from Cloud Database
+ * Fetch authoritative CMS data directly from Supabase Cloud Database.
+ * No stale in-memory caching: queries table 'cms_content' on every request.
  */
 export async function getCloudCms(): Promise<{
   success: boolean;
@@ -96,155 +105,194 @@ export async function getCloudCms(): Promise<{
   provider: string;
   isFallback?: boolean;
   instructions?: string;
-}> {
-  // Option A: Supabase PostgreSQL table 'cms_content'
-  if (supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from('cms_content')
-        .select('data')
-        .eq('id', 'default')
-        .maybeSingle();
-
-      if (error) {
-        console.warn('[Cloud CMS] Supabase query error (table might not exist yet):', error.message);
-        return {
-          success: true,
-          data: inMemoryCmsData,
-          provider: 'supabase-table-missing',
-          isFallback: true,
-          instructions:
-            'Table cms_content not found in Supabase. Run: CREATE TABLE cms_content (id TEXT PRIMARY KEY, data JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());',
-        };
-      }
-
-      if (data && data.data) {
-        inMemoryCmsData = data.data;
-        return {
-          success: true,
-          data: data.data,
-          provider: 'supabase',
-        };
-      } else {
-        // No record yet; return in-memory or null
-        return {
-          success: true,
-          data: inMemoryCmsData,
-          provider: 'supabase-empty',
-        };
-      }
-    } catch (err: any) {
-      console.error('[Cloud CMS] Unexpected error querying Supabase:', err);
-    }
-  }
-
-  // Option B: Local fallback
-  return {
-    success: true,
-    data: inMemoryCmsData,
-    provider: 'local-fallback',
-    isFallback: true,
-  };
-}
-
-/**
- * Save authoritative CMS data to Cloud Database
- */
-export async function saveCloudCms(incomingData: any): Promise<{
-  success: boolean;
-  provider: string;
-  message: string;
   error?: string;
 }> {
-  inMemoryCmsData = incomingData;
-
-  // Always attempt to mirror locally if filesystem permits
-  try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(localCmsPath, JSON.stringify(incomingData, null, 2), 'utf8');
-  } catch (localErr) {
-    // Expected on read-only environments like Vercel Lambda
-    console.log('[Cloud CMS] Note: Local filesystem write skipped (normal on Vercel):', (localErr as any)?.message);
+  const client = getSupabaseClient();
+  if (!client) {
+    console.warn('[Cloud CMS] Supabase client not configured.');
+    const fallback = getDefaultFallbackData();
+    return {
+      success: true,
+      data: fallback,
+      provider: 'local-fallback',
+      isFallback: true,
+      instructions: 'SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variable is missing.',
+    };
   }
 
-  // Option A: Save to Supabase
-  if (supabaseClient) {
-    try {
-      const { error } = await supabaseClient.from('cms_content').upsert(
+  try {
+    const { data, error } = await client
+      .from('cms_content')
+      .select('data, updated_at')
+      .eq('id', 'default')
+      .maybeSingle();
+
+    if (error) {
+      console.error('[Cloud CMS] Supabase query error:', error.message);
+      return {
+        success: false,
+        data: null,
+        provider: 'supabase',
+        error: error.message,
+        instructions:
+          'Run in Supabase SQL Editor: CREATE TABLE IF NOT EXISTS cms_content (id TEXT PRIMARY KEY, data JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());',
+      };
+    }
+
+    if (data && data.data && typeof data.data === 'object' && data.data.brand) {
+      return {
+        success: true,
+        data: data.data,
+        provider: 'supabase',
+      };
+    }
+
+    // Record is missing or incomplete; seed database with default content
+    const fallback = getDefaultFallbackData();
+    if (fallback) {
+      console.log('[Cloud CMS] Seeding empty Supabase cms_content with default content...');
+      await client.from('cms_content').upsert(
         {
           id: 'default',
-          data: incomingData,
+          data: fallback,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'id' }
       );
-
-      if (error) {
-        console.error('[Cloud CMS] Supabase save error:', error.message);
-        return {
-          success: false,
-          provider: 'supabase',
-          message: 'Failed to write to Supabase table cms_content',
-          error: error.message,
-        };
-      }
-
-      console.log('[Cloud CMS] Successfully persisted CMS data to Supabase table cms_content');
       return {
         success: true,
-        provider: 'supabase',
-        message: 'Successfully saved to Supabase Cloud Database (Live across all browsers & Vercel)',
+        data: fallback,
+        provider: 'supabase-seeded',
       };
-    } catch (err: any) {
-      console.error('[Cloud CMS] Exception saving to Supabase:', err);
+    }
+
+    return {
+      success: true,
+      data: data?.data || null,
+      provider: 'supabase-empty',
+    };
+  } catch (err: any) {
+    console.error('[Cloud CMS] Unexpected error querying Supabase:', err);
+    return {
+      success: false,
+      data: null,
+      provider: 'supabase',
+      error: err.message || 'Unknown Supabase connection error',
+    };
+  }
+}
+
+/**
+ * Save authoritative CMS data directly to Supabase Cloud Database.
+ */
+export async function saveCloudCms(incomingData: any): Promise<{
+  success: boolean;
+  provider: string;
+  data?: any;
+  message: string;
+  error?: string;
+}> {
+  if (!incomingData || typeof incomingData !== 'object') {
+    return {
+      success: false,
+      provider: 'none',
+      message: 'Invalid payload: data object is required',
+      error: 'Invalid payload',
+    };
+  }
+
+  const client = getSupabaseClient();
+  if (!client) {
+    return {
+      success: false,
+      provider: 'none',
+      message: 'Supabase credentials missing. Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.',
+      error: 'Supabase not configured',
+    };
+  }
+
+  try {
+    const now = new Date().toISOString();
+    const { data: upsertData, error } = await client
+      .from('cms_content')
+      .upsert(
+        {
+          id: 'default',
+          data: incomingData,
+          updated_at: now,
+        },
+        { onConflict: 'id' }
+      )
+      .select('data, updated_at')
+      .maybeSingle();
+
+    if (error) {
+      console.error('[Cloud CMS] Supabase save error:', error.message);
       return {
         success: false,
         provider: 'supabase',
-        message: 'Exception saving to Supabase: ' + err.message,
-        error: err.message,
+        message: 'Failed to write to Supabase table cms_content: ' + error.message,
+        error: error.message,
       };
     }
-  }
 
-  return {
-    success: true,
-    provider: 'local-fallback',
-    message: 'Saved to local memory/disk (Warning: For permanent Vercel persistence, set SUPABASE_URL & SUPABASE_SERVICE_ROLE_KEY)',
-  };
+    // Also mirror to local disk if running in persistent container (best-effort)
+    try {
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      fs.writeFileSync(localCmsPath, JSON.stringify(incomingData, null, 2), 'utf8');
+    } catch (_) {}
+
+    console.log('[Cloud CMS] Successfully persisted CMS data to Supabase table cms_content');
+    return {
+      success: true,
+      provider: 'supabase',
+      data: upsertData?.data || incomingData,
+      message: 'Successfully saved to Supabase Cloud Database (Live across all browsers & Vercel)',
+    };
+  } catch (err: any) {
+    console.error('[Cloud CMS] Exception saving to Supabase:', err);
+    return {
+      success: false,
+      provider: 'supabase',
+      message: 'Exception saving to Supabase: ' + err.message,
+      error: err.message,
+    };
+  }
 }
 
 /**
- * Reset CMS data
+ * Reset CMS data in Supabase
  */
-export async function resetCloudCms(): Promise<{ success: boolean; provider: string }> {
-  inMemoryCmsData = null;
+export async function resetCloudCms(): Promise<{ success: boolean; provider: string; data?: any; error?: string }> {
+  const fallback = getDefaultFallbackData();
+  const client = getSupabaseClient();
 
-  if (fs.existsSync(localCmsPath)) {
+  if (client && fallback) {
     try {
-      fs.unlinkSync(localCmsPath);
-    } catch (_) {}
-  }
-
-  if (supabaseClient) {
-    try {
-      await supabaseClient.from('cms_content').delete().eq('id', 'default');
-      return { success: true, provider: 'supabase' };
-    } catch (err) {
+      await client.from('cms_content').upsert(
+        {
+          id: 'default',
+          data: fallback,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' }
+      );
+      return { success: true, provider: 'supabase', data: fallback };
+    } catch (err: any) {
       console.error('[Cloud CMS] Error resetting Supabase CMS:', err);
+      return { success: false, provider: 'supabase', error: err.message };
     }
   }
 
-  return { success: true, provider: 'local' };
+  return { success: true, provider: 'local', data: fallback };
 }
 
 /**
- * Upload Image/Asset to Cloud CDN Bucket
- * Order of priority:
- * 1. Supabase Storage (Bucket 'cms_assets')
- * 2. Cloudinary CDN
- * 3. Local disk fallback
+ * Upload Image/Logo directly to Supabase Storage Bucket ('cms_assets')
+ * Returns full public CDN URL:
+ * https://<project-ref>.supabase.co/storage/v1/object/public/cms_assets/<filename>
  */
 export async function uploadCloudAsset(
   buffer: Buffer,
@@ -259,109 +307,91 @@ export async function uploadCloudAsset(
   size: number;
   error?: string;
 }> {
+  const client = getSupabaseClient();
+  if (!client) {
+    return {
+      success: false,
+      url: '',
+      provider: 'none',
+      filename,
+      size: buffer.length,
+      error: 'Supabase storage is not configured. Missing SUPABASE_URL or keys.',
+    };
+  }
+
   const sanitizedTag = tag ? tag.replace(/[^a-zA-Z0-9_-]/g, '') : 'logo';
   const ext = path.extname(filename).toLowerCase() || '.png';
-  const uniqueKey = `${sanitizedTag}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}${ext}`;
+  const uniqueKey = `${sanitizedTag}-${Date.now()}-${Math.random().toString(36).substring(2, 8)}${ext}`;
+  const bucketName = 'cms_assets';
 
-  // 1. Try Supabase Storage (bucket: 'cms_assets')
-  if (supabaseClient) {
+  try {
+    // 1. Ensure bucket exists and is public
     try {
-      const bucketName = 'cms_assets';
-
-      // Upload buffer to Supabase Storage
-      const { error: uploadError } = await supabaseClient.storage
-        .from(bucketName)
-        .upload(uniqueKey, buffer, {
-          contentType: mimeType,
-          upsert: true,
-          cacheControl: '31536000', // 1 year cache for CDN
-        });
-
-      if (uploadError) {
-        console.warn('[Cloud CMS] Supabase upload failed, bucket might need creation:', uploadError.message);
-      } else {
-        // Get public CDN URL
-        const { data: publicUrlData } = supabaseClient.storage
-          .from(bucketName)
-          .getPublicUrl(uniqueKey);
-
-        if (publicUrlData && publicUrlData.publicUrl) {
-          console.log('[Cloud CMS] Image uploaded to Supabase Storage:', publicUrlData.publicUrl);
-          return {
-            success: true,
-            url: publicUrlData.publicUrl,
-            provider: 'supabase-storage',
-            filename: uniqueKey,
-            size: buffer.length,
-          };
-        }
+      const { data: buckets } = await client.storage.listBuckets();
+      const hasBucket = buckets?.some((b) => b.name === bucketName || b.id === bucketName);
+      if (!hasBucket) {
+        await client.storage.createBucket(bucketName, { public: true });
+        console.log('[Cloud CMS] Created public bucket:', bucketName);
       }
-    } catch (err: any) {
-      console.warn('[Cloud CMS] Supabase storage exception:', err.message);
+    } catch (bErr: any) {
+      console.warn('[Cloud CMS] Bucket list/create check warning (continuing upload):', bErr?.message);
     }
-  }
 
-  // 2. Try Cloudinary
-  if (isCloudinaryConfigured) {
-    try {
-      const base64DataUri = `data:${mimeType};base64,${buffer.toString('base64')}`;
-      const uploadResult = await cloudinary.uploader.upload(base64DataUri, {
-        folder: 'dentisure_cms',
-        public_id: `${sanitizedTag}_${Date.now()}`,
-        resource_type: 'auto',
+    // 2. Upload to Supabase Storage
+    const { error: uploadError } = await client.storage
+      .from(bucketName)
+      .upload(uniqueKey, buffer, {
+        contentType: mimeType,
+        upsert: true,
+        cacheControl: '31536000', // 1 year CDN cache
       });
 
-      if (uploadResult && uploadResult.secure_url) {
-        console.log('[Cloud CMS] Image uploaded to Cloudinary CDN:', uploadResult.secure_url);
-        return {
-          success: true,
-          url: uploadResult.secure_url,
-          provider: 'cloudinary',
-          filename: uniqueKey,
-          size: uploadResult.bytes || buffer.length,
-        };
-      }
-    } catch (err: any) {
-      console.warn('[Cloud CMS] Cloudinary upload exception:', err.message);
-    }
-  }
-
-  // 3. Fallback to local /public/uploads (for local dev / containers with persistent disk)
-  try {
-    const publicUploadDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(publicUploadDir)) {
-      fs.mkdirSync(publicUploadDir, { recursive: true });
-    }
-    const localFilePath = path.join(publicUploadDir, uniqueKey);
-    fs.writeFileSync(localFilePath, buffer);
-
-    const distUploadDir = path.join(process.cwd(), 'dist', 'uploads');
-    if (fs.existsSync(path.join(process.cwd(), 'dist'))) {
-      if (!fs.existsSync(distUploadDir)) {
-        fs.mkdirSync(distUploadDir, { recursive: true });
-      }
-      fs.writeFileSync(path.join(distUploadDir, uniqueKey), buffer);
+    if (uploadError) {
+      console.error('[Cloud CMS] Supabase upload failed:', uploadError.message);
+      return {
+        success: false,
+        url: '',
+        provider: 'supabase-storage',
+        filename: uniqueKey,
+        size: buffer.length,
+        error: uploadError.message,
+      };
     }
 
-    const localUrl = `/uploads/${uniqueKey}`;
-    console.log('[Cloud CMS] Image saved to local fallback disk:', localUrl);
+    // 3. Obtain the public CDN URL
+    const { data: publicUrlData } = client.storage
+      .from(bucketName)
+      .getPublicUrl(uniqueKey);
+
+    const publicUrl = publicUrlData?.publicUrl || '';
+    if (!publicUrl) {
+      return {
+        success: false,
+        url: '',
+        provider: 'supabase-storage',
+        filename: uniqueKey,
+        size: buffer.length,
+        error: 'Failed to retrieve public URL from Supabase Storage',
+      };
+    }
+
+    console.log('[Cloud CMS] Asset uploaded to Supabase Storage CDN:', publicUrl);
     return {
       success: true,
-      url: localUrl,
-      provider: 'local-fallback',
+      url: publicUrl,
+      provider: 'supabase-storage',
       filename: uniqueKey,
       size: buffer.length,
     };
   } catch (err: any) {
-    console.error('[Cloud CMS] Local upload fallback failed:', err);
-    // As an absolute last resort, return data URI so image is NEVER lost
-    const dataUri = `data:${mimeType};base64,${buffer.toString('base64')}`;
+    console.error('[Cloud CMS] Supabase Storage exception:', err);
     return {
-      success: true,
-      url: dataUri,
-      provider: 'data-uri-fallback',
+      success: false,
+      url: '',
+      provider: 'supabase-storage',
       filename: uniqueKey,
       size: buffer.length,
+      error: err.message || 'Unknown storage upload error',
     };
   }
 }

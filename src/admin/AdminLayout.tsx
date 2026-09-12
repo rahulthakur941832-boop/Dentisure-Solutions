@@ -81,7 +81,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       case 'page-pricing':
         return { section: 'Pages Management', title: 'Pricing & Contingency' };
       case 'page-legal':
-        return { section: 'Pages Management', title: 'Legal & HIPAA Compliance' };
+        return { section: 'Pages Management', title: 'Legal & Policies Compliance' };
       case 'blog':
         return { section: 'Resources', title: 'Blog & Clinical Guides' };
       case 'media':
@@ -174,18 +174,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               >
                 <X className="w-5 h-5" />
               </button>
-            </div>
-
-            {/* Status Pills */}
-            <div className="flex items-center gap-2 pt-1">
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-semibold text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Live Sync
-              </div>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-teal-500/10 border border-teal-500/20 text-[10px] font-semibold text-teal-300">
-                <ShieldCheck className="w-3 h-3" />
-                HIPAA Guard
-              </div>
             </div>
           </div>
 
@@ -291,7 +279,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                     className={`w-full ${subNavItemClass('page-legal')}`}
                   >
                     <Scale className="w-3.5 h-3.5" />
-                    <span>Legal &amp; HIPAA</span>
+                    <span>Legal &amp; Policies</span>
                   </button>
                 </div>
               )}

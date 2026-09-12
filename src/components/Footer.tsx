@@ -54,18 +54,18 @@ export const Footer: React.FC<FooterProps> = ({
             </p>
             <div className="font-body-sm text-xs text-slate-300 space-y-1.5">
               <p>
-                <strong className="text-white">Registered Office:</strong> Level 4, Brigade Signature Towers, Indiranagar, Bengaluru, Karnataka 560038
+                <strong className="text-white">Registered Office:</strong> {cmsData.brand?.address || '111 Demo Street, Suite 100, Demo City, CA 90001 (Demo Address)'}
               </p>
               <p>
                 <strong className="text-white">Direct Phone:</strong>{' '}
-                <a href={`tel:${(cmsData.brand?.phone || '+919876543210').replace(/[^0-9+]/g, '')}`} className="text-[#7EF5F1] hover:underline font-mono">
-                  {cmsData.brand?.phone || '+91 98765 43210'}
+                <a href={`tel:${(cmsData.brand?.phone || '1111111111').replace(/[^0-9+]/g, '')}`} className="text-[#7EF5F1] hover:underline font-mono">
+                  {cmsData.brand?.phone || '+1 (111) 111-1111 (Demo)'}
                 </a>
               </p>
               <p>
                 <strong className="text-white">Email:</strong>{' '}
-                <a href="mailto:advisory@dentisure.com" className="text-[#7EF5F1] hover:underline">
-                  advisory@dentisure.com
+                <a href={`mailto:${cmsData.brand?.contactEmail || 'demo-contact@dentisure.com'}`} className="text-[#7EF5F1] hover:underline">
+                  {cmsData.brand?.contactEmail || 'demo-contact@dentisure.com (Demo)'}
                 </a>
               </p>
             </div>

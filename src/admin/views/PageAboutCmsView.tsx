@@ -14,7 +14,7 @@ import {
 import { AboutLeadershipItem } from '../../types';
 
 export const PageAboutCmsView: React.FC = () => {
-  const { cmsData, updateSection } = useCms();
+  const { cmsData, updateSection, saveToServer } = useCms();
   const [savedAlert, setSavedAlert] = useState(false);
 
   const [aboutData, setAboutData] = useState(cmsData.aboutPage);
@@ -24,8 +24,9 @@ export const PageAboutCmsView: React.FC = () => {
     setTimeout(() => setSavedAlert(false), 2500);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     updateSection('aboutPage', aboutData);
+    await saveToServer({ ...cmsData, aboutPage: aboutData });
     triggerSaveToast();
   };
 

@@ -84,7 +84,14 @@ if (fs.existsSync(leadsFilePath)) {
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
   if (!aiClient && process.env.GEMINI_API_KEY) {
-    aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    aiClient = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
   }
   return aiClient;
 }
@@ -331,6 +338,88 @@ Keep responses concise, professional, warm, and focused on dental practice succe
 
   res.json({ reply });
 });
+
+// AI Content Generator endpoint (for titles, descriptions, blog outlines & copy)
+const handleAiGenerate: express.RequestHandler = async (req, res) => {
+  const { type = 'title', prompt = '', currentText = '', context = '' } = req.body || {};
+
+  const ai = getGeminiClient();
+  if (ai) {
+    try {
+      const systemInstruction = `You are an elite healthcare copywriter and dental revenue cycle management (RCM) consultant for US dental practices.
+Write crisp, compelling, professional content. Do not include markdown code block ticks or greetings. Output only the requested copy directly.`;
+
+      let userPrompt = '';
+      if (type === 'blog_title') {
+        userPrompt = `Generate a compelling, high-converting headline for a dental billing guide about: "${prompt || 'Dental claim denial reduction'}". Output only 1 strong title.`;
+      } else if (type === 'blog_outline' || type === 'blog_content') {
+        userPrompt = `Write an authoritative, actionable guide for dental practice owners about: "${prompt || 'Eliminating dental insurance claim denials'}". Include markdown subheadings (###) and bulleted actionable tips.`;
+      } else if (type === 'description' || type === 'seo') {
+        userPrompt = `Write a high-converting, concise meta description (140-160 characters) for a dental billing service website. Topic: "${prompt || 'US dental insurance billing'}". Current: "${currentText}".`;
+      } else if (type === 'title') {
+        userPrompt = `Write a clean, professional website title (under 60 characters) for dental billing services focused on: "${prompt || 'Practice Revenue Cycle'}". Current: "${currentText}".`;
+      } else {
+        userPrompt = `Refine and improve the following text for a professional dental billing website: "${currentText || prompt}". Make it professional and authoritative.`;
+      }
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: userPrompt,
+        config: {
+          systemInstruction,
+          temperature: 0.7,
+        },
+      });
+
+      const generated = response.text?.trim();
+      if (generated) {
+        res.json({
+          result: generated,
+          isDemo: true,
+          provider: 'gemini-3.8-flash',
+          watermark: '✨ AI Content Assistant (Demo - Client Preview)',
+        });
+        return;
+      }
+    } catch (err) {
+      console.warn('[Server AI] Gemini call failed, using intelligent demo generator:', err);
+    }
+  }
+
+  // Pre-packaged smart demo responses for presentation
+  const titles = [
+    `The 2026 Dental Billing Blueprint: How Practices Eliminate 90% of Claim Denials`,
+    `Mastering Pre-Visit Insurance Verifications: Protecting Dental Practice Cash Flow`,
+    `Aging AR Recovery Sprint: How Multi-Chair Dental Clinics Reclaim 30+ Day Balances`,
+    `Fee Schedule Optimization: Maximizing Dental Practice Production and Collections`,
+    `Preventing Costly Dental Coding Mismatches (CDT Code Changes & Documentation)`,
+  ];
+
+  let result = '';
+  if (type === 'blog_title') {
+    result = titles[Math.floor(Math.random() * titles.length)];
+  } else if (type === 'blog_outline' || type === 'blog_content') {
+    result = `### Executive Summary\nDental revenue cycle management requires rigorous upstream verification. Up to 67% of dental claim rejections stem directly from missing eligibility breakdowns or outdated patient subscriber IDs.\n\n### 1. The Pre-Visit Verification Protocol\nEnsure that all patient insurances are scrubbed and verified at least 48 to 72 hours before the scheduled appointment. Capture fee schedules, remaining deductibles, frequency limitations, and waiting periods.\n\n### 2. Upfront Patient Portion Estimation\nWhen the patient sits in the operatory chair, your front desk should have an unambiguous financial ledger. Collecting patient co-pays at checkout cuts aging accounts receivable by over 45%.\n\n### 3. Dedicated Daily Claim Submission & Scrubbing\nNever batch claims weekly. Daily electronic submissions paired with automated CDT-scrubbing catch missing tooth numbers, quadrant labels, or necessary diagnostic attachments before the payer receives them.\n\n### Key Practice Action Items:\n- Review top 5 denial reasons in your PMS weekly\n- Enforce same-day attachment submission for periodontal charting and crown build-ups\n- Track net collection percentage (target > 98%)`;
+  } else if (type === 'description' || type === 'seo') {
+    result = `Specialized US dental revenue cycle management (RCM) and claims billing. We connect directly to your PMS to eliminate aging AR, slash claim denials, and accelerate practice cash flow with 98%+ clean claim rates.`;
+  } else if (type === 'title') {
+    result = `Dental Billing & Revenue Cycle Management | Maximize Collections & Minimize Denials`;
+  } else {
+    result = currentText
+      ? `Our dedicated dental revenue specialists optimize ${currentText.trim().toLowerCase()} to maximize clean claim acceptance and shorten reimbursement cycles.`
+      : `High-efficiency dental revenue cycle management engineered to increase collections.`;
+  }
+
+  res.json({
+    result,
+    isDemo: true,
+    provider: 'demo-generator',
+    watermark: '✨ AI Content Assistant (Demo - Client Preview)',
+  });
+};
+
+app.post('/api/ai/generate', handleAiGenerate);
+app.post('/api/ai', handleAiGenerate);
 
 // Setup Vite middleware or static serving
 async function start() {

@@ -3,6 +3,7 @@ import { useCms } from '../../context/CmsContext';
 import { getGoogleDriveDirectImageUrl } from '../../utils/googleDrive';
 import { HeaderNavItem, NavigationPage, SecondarySliderItem, CmsData } from '../../types';
 import { ImageUploadField } from '../../components/ImageUploadField';
+import { AiAssistantButton } from '../../components/AiAssistantButton';
 import {
   Settings,
   Save,
@@ -794,7 +795,16 @@ export const GlobalSettingsView: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-700 mb-1">Brand Tagline</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-bold text-slate-700">Brand Tagline</label>
+                <AiAssistantButton
+                  type="title"
+                  currentText={brand.tagline}
+                  onApply={(val) => setBrand({ ...brand, tagline: val })}
+                  label="✨ AI Tagline (Demo)"
+                  compact
+                />
+              </div>
               <input
                 type="text"
                 value={brand.tagline}
@@ -806,7 +816,7 @@ export const GlobalSettingsView: React.FC = () => {
             <div>
               <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
                 <Phone className="w-3.5 h-3.5 text-teal-600" />
-                Phone Line (Pan-India)
+                Advisory Phone Line (Demo)
               </label>
               <input
                 type="text"
@@ -845,7 +855,7 @@ export const GlobalSettingsView: React.FC = () => {
             <div className="md:col-span-2">
               <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-teal-600" />
-                Indian Registered Office Address
+                Office Address (Demo)
               </label>
               <input
                 type="text"

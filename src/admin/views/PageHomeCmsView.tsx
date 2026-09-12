@@ -27,7 +27,7 @@ import {
 import { FAQItem, TestimonialItem, HeroPerspective, HeroPerspectiveOption } from '../../types';
 
 export const PageHomeCmsView: React.FC = () => {
-  const { cmsData, updateSection } = useCms();
+  const { cmsData, updateSection, saveToServer } = useCms();
   const [activeSubTab, setActiveSubTab] = useState<'hero' | 'metrics' | 'why' | 'testimonials' | 'faq' | 'cta'>('hero');
   const [activePerspective, setActivePerspective] = useState<HeroPerspective>('elite');
   const [savedAlert, setSavedAlert] = useState(false);
@@ -50,36 +50,43 @@ export const PageHomeCmsView: React.FC = () => {
     setTimeout(() => setSavedAlert(false), 2500);
   };
 
-  const handleSaveHero = () => {
+  const handleSaveHero = async () => {
     updateSection('hero', hero);
+    await saveToServer({ ...cmsData, hero });
     triggerSaveToast();
   };
 
-  const handleSaveMetrics = () => {
+  const handleSaveMetrics = async () => {
     updateSection('trustMetrics', metrics);
+    await saveToServer({ ...cmsData, trustMetrics: metrics });
     triggerSaveToast();
   };
 
-  const handleSaveWhyChoose = () => {
+  const handleSaveWhyChoose = async () => {
     updateSection('whyChoose', whyChoose);
+    await saveToServer({ ...cmsData, whyChoose });
     triggerSaveToast();
   };
 
-  const handleSaveTestimonials = () => {
+  const handleSaveTestimonials = async () => {
     updateSection('testimonials', testimonials);
+    await saveToServer({ ...cmsData, testimonials });
     triggerSaveToast();
   };
 
-  const handleSaveFaqs = () => {
+  const handleSaveFaqs = async () => {
     updateSection('faqs', faqs);
+    await saveToServer({ ...cmsData, faqs });
     triggerSaveToast();
   };
 
-  const handleSaveFinalCta = () => {
-    updateSection('pricing', {
+  const handleSaveFinalCta = async () => {
+    const updatedPricing = {
       ...cmsData.pricing,
       guaranteeText: finalCta.title,
-    });
+    };
+    updateSection('pricing', updatedPricing);
+    await saveToServer({ ...cmsData, pricing: updatedPricing });
     triggerSaveToast();
   };
 

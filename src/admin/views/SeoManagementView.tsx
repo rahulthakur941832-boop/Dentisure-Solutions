@@ -11,9 +11,10 @@ import {
   Share2,
 } from 'lucide-react';
 import { SeoConfig } from '../../types';
+import { AiAssistantButton } from '../../components/AiAssistantButton';
 
 export const SeoManagementView: React.FC = () => {
-  const { cmsData, updateSection } = useCms();
+  const { cmsData, updateSection, saveToServer } = useCms();
   const [savedAlert, setSavedAlert] = useState(false);
   const [seo, setSeo] = useState<SeoConfig>(cmsData.seo);
 
@@ -22,8 +23,9 @@ export const SeoManagementView: React.FC = () => {
     setTimeout(() => setSavedAlert(false), 2500);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     updateSection('seo', seo);
+    await saveToServer({ ...cmsData, seo });
     triggerSaveToast();
   };
 
@@ -138,7 +140,16 @@ export const SeoManagementView: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block font-bold text-slate-700 mb-1">Global Site Title Tag (&lt;title&gt;)</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-bold text-slate-700">Global Site Title Tag (&lt;title&gt;)</label>
+              <AiAssistantButton
+                type="title"
+                currentText={seo.siteTitle}
+                onApply={(val) => setSeo({ ...seo, siteTitle: val })}
+                label="✨ AI Title (Demo)"
+                compact
+              />
+            </div>
             <input
               type="text"
               value={seo.siteTitle}
@@ -148,7 +159,16 @@ export const SeoManagementView: React.FC = () => {
           </div>
 
           <div className="md:col-span-2">
-            <label className="block font-bold text-slate-700 mb-1">Meta Description</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-bold text-slate-700">Meta Description</label>
+              <AiAssistantButton
+                type="seo"
+                currentText={seo.metaDescription}
+                onApply={(val) => setSeo({ ...seo, metaDescription: val })}
+                label="✨ AI Meta Description (Demo)"
+                compact
+              />
+            </div>
             <textarea
               rows={3}
               value={seo.metaDescription}
@@ -212,7 +232,16 @@ export const SeoManagementView: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block font-bold text-slate-700 mb-1">og:title</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-bold text-slate-700">og:title</label>
+              <AiAssistantButton
+                type="title"
+                currentText={seo.ogTitle}
+                onApply={(val) => setSeo({ ...seo, ogTitle: val })}
+                label="✨ AI Title (Demo)"
+                compact
+              />
+            </div>
             <input
               type="text"
               value={seo.ogTitle}
@@ -232,7 +261,16 @@ export const SeoManagementView: React.FC = () => {
           </div>
 
           <div className="md:col-span-2">
-            <label className="block font-bold text-slate-700 mb-1">og:description</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block font-bold text-slate-700">og:description</label>
+              <AiAssistantButton
+                type="seo"
+                currentText={seo.ogDescription}
+                onApply={(val) => setSeo({ ...seo, ogDescription: val })}
+                label="✨ AI Meta Description (Demo)"
+                compact
+              />
+            </div>
             <textarea
               rows={2}
               value={seo.ogDescription}
@@ -240,6 +278,17 @@ export const SeoManagementView: React.FC = () => {
               className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl"
             />
           </div>
+        </div>
+
+        {/* Demo Watermark */}
+        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-slate-500 text-xs">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-[10px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span className="font-semibold">
+              ✨ AI SEO Assistant (Demo Feature — Client Preview Version)
+            </span>
+          </div>
+          <span className="text-[10px] text-slate-400">Generates Google-compliant meta tags</span>
         </div>
       </div>
     </div>
