@@ -59,6 +59,17 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   const [mode, setMode] = useState<'upload' | 'url'>('upload');
   const [manualUrl, setManualUrl] = useState(value || '');
 
+  // Synchronize manualUrl when value prop updates from parent or database
+  React.useEffect(() => {
+    setManualUrl(value || '');
+  }, [value]);
+
+  const handleManualUrlChange = (newVal: string) => {
+    setManualUrl(newVal);
+    // Instant propagation to parent state so user does not have to click a button before saving
+    onChange(newVal.trim());
+  };
+
   // Determine current active display image
   const resolvedUrl = value ? getGoogleDriveDirectImageUrl(value) : null;
   const displaySrc = resolvedUrl || defaultLogoSrc;
@@ -273,7 +284,8 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
             <input
               type="text"
               value={manualUrl}
-              onChange={(e) => setManualUrl(e.target.value)}
+              onChange={(e) => handleManualUrlChange(e.target.value)}
+              onBlur={() => handleManualUrlApply()}
               placeholder="https://... or Google Drive sharing link or /uploads/..."
               className="flex-1 p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-mono"
             />

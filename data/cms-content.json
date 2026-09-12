@@ -1,0 +1,958 @@
+{
+  "seo": {
+    "robots": "index, follow",
+    "ogImage": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=1200&auto=format&fit=crop&q=80",
+    "ogTitle": "DentiSure Solutions | Your Certainty in Dental Revenue",
+    "keywords": "dental billing company, dental RCM, dental insurance verification, dental claims scrubbing, dentist aging AR recovery, Dentrix billing service, Eaglesoft billing service, Open Dental billing, dental practice revenue cycle",
+    "siteTitle": "DentiSure Solutions | Dental Billing, Claims & Revenue Cycle Management",
+    "analyticsId": "G-DENTISURE2026",
+    "canonicalUrl": "https://dentisuresolutions.com",
+    "ogDescription": "Stop chasing payments. Partner with dental billing specialists who eliminate denials and maximize clean claim collections.",
+    "metaDescription": "Eliminate dental insurance aging AR and reclaim front-desk peace of mind. Specialized dental revenue cycle specialists connecting securely to Dentrix, Eaglesoft, Open Dental, and Curve."
+  },
+  "blog": [
+    {
+      "id": "checklist-23",
+      "date": "Updated March 2026",
+      "title": "The 23-Point Dental Insurance Verification Checklist",
+      "author": "DentiSure Clinical Billing Team",
+      "content": [
+        "1. Verification Basics: Effective date, termination date, subscriber ID, and exact group number.",
+        "2. Annual Maximums: Total benefit maximum, amount used year-to-date, and date of plan reset (calendar year vs. fiscal year).",
+        "3. Deductibles: Individual vs. family deductible, whether preventive services apply to the deductible.",
+        "4. Preventive & Diagnostic Frequencies: 2 cleanings per calendar year vs. 1 every 6 months to the day; bitewing frequencies (1 set every 12 months) and FMX/Panoramic limits (once every 3 to 5 years).",
+        "5. Basic & Major Restorative: Waiting periods, missing tooth clause, downgrade policies on posterior composites, and crown replacement frequency rules (5, 7, or 10 years).",
+        "6. Periodontal Guidelines: Prior history of scaling and root planing, pocket depth requirements, and periodontal maintenance limitations.",
+        "7. Payer Submission Preferences: Electronic Payer ID, attachment requirements, and timely filing limits (often 90 to 180 days)."
+      ],
+      "snippet": "Missing even one plan limitation can turn an expected $1,200 crown reimbursement into an uncollectable patient dispute. Here are the 23 essential items your team must verify 72 hours prior to every appointment.",
+      "category": "Practice Guides",
+      "readTime": "6 min read",
+      "downloadableChecklist": "Printable_23_Point_Dental_Verification_Checklist.pdf"
+    },
+    {
+      "id": "ar-costs",
+      "date": "February 2026",
+      "title": "Why 90+ Day Dental AR is Costing You Far More Than You Think",
+      "author": "DentiSure Financial RCM Group",
+      "content": [
+        "Dental practices often view their accounts receivable as money in the bank that simply takes time to arrive. In reality, aging AR suffers severe decay over time.",
+        "Timely Filing Traps: Many major payers (including UnitedHealthcare and certain Delta Dental plans) enforce strict 90 or 180-day timely filing cutoffs. An unworked claim quickly becomes an unappealable contractual write-off.",
+        "Staff Burnout: Front-desk team members dread calling insurance companies, enduring 45-minute hold times only to be told a claim was \"never received.\" This leads to turnover and deferred patient care.",
+        "Solution: Implementing a systematic 14-day claim touch cycle where no claim remains untouched for more than two weeks restores collection predictability."
+      ],
+      "snippet": "According to ADA financial benchmarks, once a dental claim passes 90 days unpaid, its collection probability drops below 60%. At 180 days, it plummets to under 20%.",
+      "category": "Revenue Cycle",
+      "readTime": "5 min read"
+    },
+    {
+      "id": "denial-prevention",
+      "date": "January 2026",
+      "title": "Top 7 Reasons Dental Claims Get Denied in 2026 & How to Prevent Them",
+      "author": "DentiSure Claims Audit Team",
+      "content": [
+        "1. Missing Radiographs or Diagnostic Imagery: Failing to attach diagnostic periapical or bitewing x-rays for crowns, bridges, and endodontics.",
+        "2. Incomplete Periodontal Charting: Submitting D4341/D4342 without full 6-point probing depths, bleeding indices, and radiographic bone loss evidence.",
+        "3. Missing Narrative Justification: Not documenting why a fractured tooth cannot be restored with a conventional composite filling instead of a crown.",
+        "4. Incorrect Primary/Secondary Payers: Failing to properly follow standard Coordination of Benefits (COB) and Birthday Rule guidelines.",
+        "5. Outdated CDT Procedure Codes: Using deleted codes or missing new code updates introduced in the latest ADA CDT code cycle.",
+        "6. Missing Tooth Clause Mismatches: Failing to check if missing teeth extracted prior to plan enrollment are excluded from prosthetic coverage."
+      ],
+      "snippet": "Over 68% of dental claim denials are completely avoidable with pre-submission scrubbing. Here are the most frequent triggers and their immediate remedies.",
+      "category": "Coding & Compliance",
+      "readTime": "7 min read"
+    }
+  ],
+  "faqs": [
+    {
+      "id": "faq-1",
+      "answer": "DentiSure Solutions is a premier dental practice revenue cycle management and billing support service assisting dental clinics nationwide across India. We handle treatment pre-authorizations, clean billing submissions, payment reconciliation, aging recovery, and dispute resolution under the tagline: Your Certainty in Dental Revenue.",
+      "category": "General",
+      "question": "What is DentiSure Solutions?"
+    },
+    {
+      "id": "faq-2",
+      "answer": "We connect directly to your existing practice management software (Dentrix, Practo Ray, Clinicea, Open Dental, etc.) using an encrypted, secure VPN or remote access protocol. We execute a mutual Non-Disclosure and DPDP Data Processing Agreement before any work begins, and all patient data remains strictly inside your own clinic software.",
+      "category": "Security & Tech",
+      "question": "How do you access our dental software securely?"
+    },
+    {
+      "id": "faq-3",
+      "answer": "Our dedicated team consists of seasoned dental revenue coordinators with comprehensive expertise in dental clinical codes, corporate tie-up claims, third-party billing protocols, and payment reconciliation. We operate with zero software migration, working directly within your authorized PMS.",
+      "category": "Billing & Claims",
+      "question": "How does your team specialize in dental clinic billing?"
+    },
+    {
+      "id": "faq-4",
+      "answer": "Our rapid onboarding takes just 3 to 5 business days. After a quick discovery call, we configure secure remote access, align on your practice fee schedules and protocols, sign the service agreement, and begin active support.",
+      "category": "Onboarding",
+      "question": "How quickly can our dental clinic get started?"
+    },
+    {
+      "id": "faq-5",
+      "answer": "We offer transparent, performance-aligned pricing tailored for Indian dental practices. Our Full Revenue Cycle service is typically aligned as a modest contingency percentage of recovered collections (meaning we only earn when your clinic collects), or fixed monthly packages for solo clinics. We do not lock you into rigid long-term contracts.",
+      "category": "Pricing",
+      "question": "What is your pricing structure?"
+    },
+    {
+      "id": "faq-6",
+      "answer": "We track every rejection within 24–48 hours of transmission. For denied claims, our specialists conduct a root-cause review, gather necessary doctor chart notes, x-rays, and narratives, and file formal appeals. We boast an 88% success rate in overturning unjustified dental insurance denials.",
+      "category": "Billing & Claims",
+      "question": "How do you handle denied or rejected claims?"
+    },
+    {
+      "id": "faq-7",
+      "answer": "DentiSure does not replace your front desk—we empower them! By taking over the exhausting 45-minute insurance phone calls, hold times, and billing paperwork, your front desk can focus entirely on greeting patients, presenting treatment plans, filling chair schedule gaps, and increasing same-day case acceptance.",
+      "category": "General",
+      "question": "What happens to our existing front-desk team?"
+    },
+    {
+      "id": "faq-8",
+      "answer": "Yes. In addition to general and family dentistry, we have specialized billing protocols for pediatric dentistry, orthodontics, periodontics, endodontics, and oral and maxillofacial surgery (including cross-coding medical billing for dental procedures when applicable).",
+      "category": "Billing & Claims",
+      "question": "Do you work with specialized dental practices?"
+    },
+    {
+      "id": "faq-9",
+      "answer": "You have 100% transparency. Every note, action, and adjustment is recorded directly inside your dental software ledger in real time. In addition, we deliver weekly and monthly executive dashboards highlighting collections, clean-claim rates, and AR aging trends.",
+      "category": "Billing & Claims",
+      "question": "How do we track what DentiSure is doing on our accounts?"
+    },
+    {
+      "id": "faq-10",
+      "answer": "You can request a Confidential Practice Revenue Audit directly through our website. We will review your 30/60/90+ aging reports, identify dormant money sitting in insurance accounts, and provide a clear roadmap to collect every dollar you are owed.",
+      "category": "General",
+      "question": "How do I request a free Practice Revenue Audit?"
+    }
+  ],
+  "hero": {
+    "badge": "Dedicated Dental Billing & Revenue Cycle Specialists",
+    "headline": "Dental Billing, Perfected.",
+    "videoUrl": "",
+    "heroImage": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=900&auto=format&fit=crop&q=80",
+    "mediaType": "image",
+    "opsCardPms": "Practo Ray & Encrypted Sync",
+    "stat1Label": "First-Pass Clean Claim Acceptance",
+    "stat1Value": "98%+",
+    "stat2Label": "Claims Remaining in 30+ Day Aging",
+    "stat2Value": "<10%",
+    "stat3Label": "Fast Reconciliation & Patient Ledger Posting",
+    "stat3Value": "24–48 Hrs",
+    "phoneNotice": "Or speak directly with a dental billing coordinator:",
+    "subheadline": "We connect directly to your PMS (Dentrix, Practo Ray, Clinicea, Open Dental) via secure encrypted connection. Capture every rupee your dental practice earns without front-desk chaos.",
+    "videoPoster": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=900&auto=format&fit=crop&q=80",
+    "opsCardBadge": "Active Batch Clean",
+    "opsCardTitle": "Apex Dental Specialists",
+    "perspectives": {
+      "elite": {
+        "id": "elite",
+        "badge": "The Elite Standard in Dental RCM",
+        "headline": "Dental Billing, Perfected.",
+        "tabLabel": "Elite Standard",
+        "primaryCta": "Request Confidential Revenue Audit",
+        "subheadline": "No guesswork. No lost revenue. Just a streamlined, DPDP & NABH-aligned system that captures every rupee your dental practice earns.",
+        "secondaryCta": "Explore Our Process",
+        "highlightText": "Your Certainty in Dental Revenue.",
+        "highlightPills": [
+          "Encrypted Remote PMS Access",
+          "98%+ Clean Claim Acceptance",
+          "Dedicated Dental Billing Specialists"
+        ]
+      },
+      "growth": {
+        "id": "growth",
+        "badge": "Strategic Revenue Multiplication",
+        "headline": "Turn Your Billing Department into a Profit Center.",
+        "tabLabel": "Financial ROI / Growth",
+        "primaryCta": "Calculate Your Practice ROI",
+        "subheadline": "A dedicated revenue cycle team that recovers hidden revenue leakage, slashes aging balances, and accelerates healthy cash flow.",
+        "secondaryCta": "See Financial Benchmarks",
+        "highlightText": "Accelerate Cash Flow.",
+        "highlightPills": [
+          "Average ₹3.5 Lakhs+ Recovered in 90 Days",
+          "50% Reduction in Aging AR",
+          "Contingency-Aligned Pricing"
+        ]
+      },
+      "stress-free": {
+        "id": "stress-free",
+        "badge": "The Stress-Free Practice Partner",
+        "headline": "Stop Chasing Payments. Start Focusing on Care.",
+        "tabLabel": "Stress-Free Clinic",
+        "primaryCta": "Schedule a Free Practice Consultation",
+        "subheadline": "We handle the relentless billing and third-party reimbursement maze for you, ensuring your practice gets paid accurately and on time while your front desk focuses on patients.",
+        "secondaryCta": "Learn How We Work",
+        "highlightText": "Zero Front-Desk Chaos.",
+        "highlightPills": [
+          "Reclaim 20+ Front Desk Hours/Week",
+          "Zero Billing Follow-up Hassles",
+          "Dedicated Dental Account Manager"
+        ]
+      }
+    },
+    "highlightText": "Your Certainty in Dental Revenue.",
+    "primaryCtaText": "Request Free Revenue Audit",
+    "trustCardBadge": "DPDP Act & NABH Standards Compliant",
+    "viewpointTitle": "Practice Viewpoint:",
+    "opsCardLocation": "Indiranagar, Bengaluru",
+    "trustStripTitle": "Trusted by 240+ Solo & Multispecialty Dental Clinics",
+    "secondaryCtaText": "Explore Claim Solutions",
+    "opsRecentActivity": [
+      {
+        "label": "Corporate Health Claim Settled (Crowns #14, #19)",
+        "amountOrBadge": "+₹28,400"
+      },
+      {
+        "label": "Insurance Query Appeal Cleared (Implant Surgery)",
+        "amountOrBadge": "+₹45,000"
+      },
+      {
+        "label": "Tomorrow Schedule Breakdown (18 Patients)",
+        "amountOrBadge": "Verified"
+      }
+    ],
+    "trustStripSubtitle": "Over ₹180M+ in dental claims & practice revenue managed across India.",
+    "opsCardAmountProcessedToday": "₹3,42,800 Processed",
+    "opsCardClaimsProcessedToday": "38 Claims"
+  },
+  "brand": {
+    "name": "DentiSure Solutions",
+    "hours": "Mon – Sat: 9:00 AM – 7:00 PM EST (Practice Support)",
+    "phone": "+1 (111) 111-1111 (Demo)",
+    "address": "111 Demo Street, Suite 100, Demo City, CA 90001 (Demo Address)",
+    "tagline": "Your Certainty in Dental Revenue",
+    "phoneDirect": "+1 (111) 111-1111 (Demo)",
+    "contactEmail": "demo-contact@dentisure.com (Demo)",
+    "billingAddress": "Demo Electronic Billing Desk, Demo City (Demo)",
+    "einTaxIdNotice": "[Demo Tax ID & Registration — Disclosed upon Service Agreement]",
+    "inquiriesEmail": "demo-inquiries@dentisure.com (Demo)",
+    "mailingAddress": "111 Demo Avenue, Building A, Demo City, CA 90001 (Demo Address)",
+    "legalEntityName": "DentiSure Solutions Pvt. Ltd.",
+    "businessSetupType": "Registered Dental Billing & Healthcare Administration Entity (Demo)",
+    "usBusinessAddress": "111 Demo Street, Suite 100, Demo City, CA 90001 (Demo Address)"
+  },
+  "legal": {
+    "hipaa": {
+      "intro": "DentiSure Solutions Pvt. Ltd. operates in full alignment with the Digital Personal Data Protection (DPDP) Act, NABH clinical record guidelines, and global ISO/IEC 27001 data protection standards. We execute a formal Non-Disclosure and Data Processing Agreement with every dental practice partner prior to accessing any clinic systems.",
+      "title": "Data Confidentiality & DPDP Security Statement",
+      "sections": [
+        {
+          "body": "Before any DentiSure specialist is granted access to your Practice Management Software (Dentrix, Eaglesoft, Open Dental, Curve, etc.), our executive team executes a legally binding, comprehensive HIPAA Business Associate Agreement. This agreement explicitly delineates our duties to safeguard patient confidentiality and restricts ePHI usage strictly to permitted healthcare billing operations.",
+          "heading": "1. Mandatory Business Associate Agreement (BAA)"
+        },
+        {
+          "body": "All remote access to client systems is conducted over dedicated AES-256 encrypted VPN connections or authorized zero-trust remote desktop solutions. Direct downloads, unencrypted caching, or external storage of patient rosters, radiographs, or ledger balances to non-approved local drives are technologically blocked and prohibited.",
+          "heading": "2. Technical Safeguards & Encrypted Remote Access"
+        },
+        {
+          "body": "All DentiSure billing specialists, account managers, and audit leaders undergo rigorous mandatory HIPAA compliance training upon onboarding and annual recertification thereafter. All personnel sign non-disclosure agreements with strict legal liability provisions.",
+          "heading": "3. Administrative Safeguards & Workforce Training"
+        },
+        {
+          "body": "Workstations utilized by our billing team are configured with automatic inactivity screen locks, encrypted storage, disabled unauthorized USB mass-storage capabilities, up-to-date endpoint detection and response (EDR) software, and privacy safeguards.",
+          "heading": "4. Physical Safeguards & Workstation Security"
+        },
+        {
+          "body": "In accordance with 45 CFR §§ 164.400–414, DentiSure maintains a written incident response plan. In the unlikely event of a suspected security incident or impermissible disclosure of ePHI, DentiSure will notify the impacted Covered Entity in writing without unreasonable delay and in no case later than twenty-four (24) hours following discovery.",
+          "heading": "5. Breach Notification & Incident Response Protocol"
+        }
+      ],
+      "lastUpdated": "March 1, 2026"
+    },
+    "terms": {
+      "intro": "These Terms of Service (\"Agreement\") govern the dental revenue cycle management (RCM), insurance billing, verification, and administrative consulting services provided by DentiSure Solutions LLC (\"DentiSure\", \"we\", \"us\", or \"our\") to your dental practice or business entity (\"Client\", \"Practice\", or \"you\").",
+      "title": "Terms of Service & Engagement Agreement",
+      "sections": [
+        {
+          "body": "DentiSure agrees to perform remote dental administrative and insurance revenue cycle management services as selected by the Practice, including but not limited to: insurance eligibility verification, electronic claim scrubbing and batch submission, EOB/ERA line-item payment posting, aging accounts receivable (AR) follow-up, and insurance denial appeals. All services are performed directly within the Practice Management Software (PMS) authorized by the Practice.",
+          "heading": "1. Scope of Dental Billing Services"
+        },
+        {
+          "body": "The Practice retains complete and exclusive responsibility for patient clinical diagnosis, treatment plans, fees charged, and the clinical veracity of patient records and doctor narratives. Practice agrees to maintain secure remote VPN or software credentials for DentiSure specialists and promptly provide diagnostic x-rays, perio charts, and clinical notes required for claim attachments.",
+          "heading": "2. Practice Responsibilities & Clinical Authority"
+        },
+        {
+          "body": "Service fees are invoiced monthly based upon the agreed contingency percentage of gross insurance collections or per-verification flat rates established in the signed Statement of Work (SOW). Invoices are due within ten (10) business days of issuance via ACH electronic debit or authorized payment method. Late payments beyond thirty (30) days may incur a 1.5% monthly service charge.",
+          "heading": "3. Fees, Contingency Billing & Invoicing"
+        },
+        {
+          "body": "DentiSure acts solely as an independent contractor. Nothing in this Agreement shall be construed to create a partnership, joint venture, or employer-employee relationship between DentiSure and the Practice or any of its team members.",
+          "heading": "4. Non-Exclusivity & Independent Contractor Relationship"
+        },
+        {
+          "body": "Unless otherwise stipulated in an individual SOW, services operate on a month-to-month basis after the initial 30-day onboarding period. Either party may terminate the engagement by providing thirty (30) calendar days written notice. DentiSure offers a 30-Day Risk-Free Performance Guarantee as detailed in the applicable agreement.",
+          "heading": "5. Term, Cancellation & Performance Guarantee"
+        },
+        {
+          "body": "This Agreement shall be governed by and construed in accordance with the laws of India. Any dispute arising under this Agreement shall first be submitted to good-faith mediation before the competent courts of New Delhi or Bengaluru, India.",
+          "heading": "6. Governing Law & Dispute Resolution"
+        }
+      ],
+      "lastUpdated": "March 1, 2026"
+    },
+    "privacy": {
+      "intro": "DentiSure Solutions Pvt. Ltd. (\"DentiSure\") is dedicated to protecting the privacy, confidentiality, and security of our dental practice partners, prospective clients, and any information processed through our digital platforms and remote billing systems in accordance with the Digital Personal Data Protection (DPDP) Act and healthcare standards.",
+      "title": "Privacy Policy & Data Security",
+      "sections": [
+        {
+          "body": "We collect business information submitted voluntarily through our website, such as doctor names, dental practice names, practice email addresses, phone numbers, PMS software types, and estimated monthly production volumes when you request a Practice Revenue Audit, fee consultation, or download informational guides.",
+          "heading": "1. Information We Collect"
+        },
+        {
+          "body": "Information gathered through website forms is used exclusively to prepare customized revenue analyses, contact you regarding scheduled audit appointments, provide requested billing proposals, and deliver practice improvement insights. We never sell, rent, or trade your practice contact details to third-party advertisers.",
+          "heading": "2. How We Use Practice Information"
+        },
+        {
+          "body": "DentiSure never extracts, downloads, or stores unencrypted patient health information onto external local computers. All billing operations occur strictly inside the authorized Practice Management Software via secure, encrypted VPN or authorized cloud portals in strict adherence to DPDP Act confidentiality mandates.",
+          "heading": "3. Protected Patient Information & Clinical Data"
+        },
+        {
+          "body": "Our website uses standard session cookies and anonymous analytical tracking to improve user navigation, monitor page responsiveness, and evaluate engagement with practice guides. You may disable cookies through your web browser preferences at any time.",
+          "heading": "4. Cookies & Website Analytics"
+        },
+        {
+          "body": "We maintain multi-factor authentication (MFA), end-to-end TLS 1.3 encryption, role-based access controls, and regular security audits across all remote workstations utilized by our dental billing specialists.",
+          "heading": "5. Security Protocols & Safeguards"
+        }
+      ],
+      "lastUpdated": "March 1, 2026"
+    }
+  },
+  "footer": {
+    "logoUrl": "https://zyqfyrstjlekviytjpis.supabase.co/storage/v1/object/public/cms_assets/header_logo-1789202556134-ue8yc6.svg",
+    "pmsList": [
+      "Dentrix (G4–G7+ & Ascend)",
+      "Practo Ray Dental Suite",
+      "Clinicea Dental PMS",
+      "Open Dental (v18–v24+)",
+      "Eaglesoft Dental",
+      "KareXpert & Custom Cloud PMS"
+    ],
+    "aboutText": "DentiSure Solutions is the premier dental billing and revenue cycle management partner for dental clinics across India. Our certified specialists connect securely to your PMS via encrypted VPN to eliminate billing backlogs and maximize rightful practice collections.",
+    "copyright": "© 2026 DentiSure Solutions Pvt. Ltd. All rights reserved. Registered Indian Dental Billing & Healthcare Administration Entity.",
+    "disclaimer": "DentiSure Solutions operates as a specialized dental administration and billing support partner under formal Non-Disclosure and DPDP Data Confidentiality Agreements. All clinic records and patient data remain strictly confidential inside provider PMS vaults.",
+    "logoHeight": 40,
+    "agencyCredit": "Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)"
+  },
+  "header": {
+    "logoUrl": "https://zyqfyrstjlekviytjpis.supabase.co/storage/v1/object/public/cms_assets/header_logo-1789202556134-ue8yc6.svg",
+    "navItems": [
+      {
+        "id": "nav-home",
+        "page": "home",
+        "label": "Home",
+        "order": 1,
+        "enabled": true
+      },
+      {
+        "id": "nav-about",
+        "page": "about",
+        "label": "About Us",
+        "order": 2,
+        "enabled": true
+      },
+      {
+        "id": "nav-solutions",
+        "page": "solutions",
+        "label": "Solutions",
+        "order": 3,
+        "enabled": true
+      },
+      {
+        "id": "nav-pricing",
+        "page": "pricing",
+        "label": "Pricing & ROI",
+        "order": 4,
+        "enabled": true
+      },
+      {
+        "id": "nav-blog",
+        "page": "blog",
+        "label": "Blog & Guides",
+        "order": 5,
+        "enabled": true
+      },
+      {
+        "id": "nav-contact",
+        "page": "contact",
+        "label": "Contact Us",
+        "order": 6,
+        "enabled": true
+      }
+    ],
+    "topNotice": "Pan-India Dedicated Dental Revenue Cycle & Practice Billing Management",
+    "logoHeight": 44,
+    "phoneLabel": "Practice Advisory Desk:",
+    "showTopBar": true,
+    "portalLinkText": "Admin CMS Portal",
+    "auditButtonText": "Free Revenue Audit",
+    "showAuditButton": true
+  },
+  "pricing": {
+    "tiers": [
+      {
+        "cta": "Get Started with Verification",
+        "tag": "Prevent Denials Front-End",
+        "name": "Eligibility Verification Only",
+        "unit": "per verified patient",
+        "price": "$3.50",
+        "features": [
+          "Full 23-point breakdown 48-72h in advance",
+          "Direct entry into your dental PMS",
+          "Remaining maximums & deductible tracking",
+          "Frequency limits (FMX, Prophy, Crowns)",
+          "Patient copay breakdown for check-in",
+          "No long-term contracts (cancel anytime)"
+        ],
+        "idealFor": "Practices with in-house billers who need front-desk phone relief",
+        "highlight": false
+      },
+      {
+        "cta": "Request Custom Practice Proposal",
+        "tag": "Most Popular for High-Production Practices",
+        "name": "Full Revenue Cycle Management",
+        "unit": "of insurance collections (contingency)",
+        "price": "2.9% – 3.8%",
+        "features": [
+          "Complete claim scrubbing & daily electronic submission",
+          "All mandatory x-ray & narrative attachments",
+          "Daily payment posting & adjustment reconciliation",
+          "Aggressive denial appeals & peer reviews",
+          "Dedicated Account Billing Specialist",
+          "Weekly transparent performance dashboards",
+          "Contingency pricing: We only get paid when you get paid"
+        ],
+        "idealFor": "Solo practices, group clinics, and growing dental offices wanting complete certainty",
+        "highlight": true
+      },
+      {
+        "cta": "Rescue Your Aging AR",
+        "tag": "Rapid Cash Injection Project",
+        "name": "Aging AR Recovery Sprint",
+        "unit": "based on recovered funds",
+        "price": "Audit + Contingency",
+        "features": [
+          "Exhaustive audit of every claim older than 30 days",
+          "Direct phone follow-ups with insurance examiners",
+          "Unapplied credit and unposted payment cleanup",
+          "Resubmission of lost claims with required attachments",
+          "Bi-weekly cash collection report",
+          "Hands-off execution: Zero burden on your front desk"
+        ],
+        "idealFor": "Offices with large 60, 90, and 120+ day balances tied up in insurance limbo",
+        "highlight": false
+      }
+    ],
+    "title": "Transparent, Performance-Aligned Pricing",
+    "subtitle": "No hidden setup penalties, no software fees, and no restrictive multi-year contracts. We only win when you collect.",
+    "guaranteeText": "30-Day Risk-Free Performance Guarantee on all Full Revenue Cycle contracts."
+  },
+  "branding": {
+    "agencyCredit": "Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)",
+    "customLogoUrl": "",
+    "footerLogoUrl": "https://zyqfyrstjlekviytjpis.supabase.co/storage/v1/object/public/cms_assets/header_logo-1789202556134-ue8yc6.svg",
+    "headerLogoUrl": "https://zyqfyrstjlekviytjpis.supabase.co/storage/v1/object/public/cms_assets/header_logo-1789202556134-ue8yc6.svg",
+    "showLogoImage": false,
+    "customFaviconUrl": "",
+    "footerLogoHeight": 40,
+    "headerLogoHeight": 44,
+    "googleDriveLogoUrl": "",
+    "googleDriveFaviconUrl": ""
+  },
+  "services": {
+    "title": "Comprehensive Dental Revenue Cycle Management",
+    "pillars": [
+      {
+        "id": "verification",
+        "badge": "Critical Front-End Step",
+        "title": "Pre-Visit Insurance Eligibility & Verification",
+        "iconName": "ShieldCheck",
+        "subtitle": "Eliminate surprise copays and unexpected denials before the patient sits in the operatory.",
+        "deliverables": [
+          "Comprehensive 23-point breakdown verified 48–72 hours prior to appointment",
+          "Remaining maximums, deductibles, waiting periods, and frequency limits checked",
+          "Direct data entry into Dentrix, Eaglesoft, Open Dental, or Curve",
+          "Accurate patient out-of-pocket estimates ready for front-desk presentation"
+        ],
+        "metricsImpact": "Reduces front-desk check-in delays by 80% & cuts eligibility denials to <1%",
+        "workflowDetail": "Our team pulls your schedule 2-3 days in advance, calls payers, verifies online portals, and notes exact plan coverage directly in the patient file."
+      },
+      {
+        "id": "claims",
+        "badge": "Daily Core Engine",
+        "title": "Daily Clean Claim Submission & Coding Scrubbing",
+        "iconName": "FileCheck2",
+        "subtitle": "Accurate CDT coding, clinical attachments, and zero-day batch turnaround.",
+        "deliverables": [
+          "Daily electronic batch scrubbing and validation through your clearinghouse",
+          "Mandatory x-ray, photo, and perio chart attachments matched to CDT requirements",
+          "Custom clinical narrative formulation for major restorative & periodontal treatments",
+          "Dual-coverage coordination of benefits (COB) handled accurately"
+        ],
+        "metricsImpact": "98%+ clean claim first-pass acceptance rate within 24 hours of treatment",
+        "workflowDetail": "We log into your PMS daily, review completed procedures, verify clinical chart notes, and submit clean claims before the end of the business day."
+      },
+      {
+        "id": "appeals",
+        "badge": "Revenue Defense",
+        "title": "Assertive Denial Management & Targeted Appeals",
+        "iconName": "AlertCircle",
+        "subtitle": "We do not accept arbitrary insurance rejections. We fight for every legitimate earned dollar.",
+        "deliverables": [
+          "Instant triage of clearinghouse and payer rejections within 48 hours",
+          "Detailed root-cause analysis preventing repeat denials from same payers",
+          "Comprehensive appeal packages with doctor clinical notes and surgical photos",
+          "Direct peer-to-peer and supervisor escalations for delayed claims"
+        ],
+        "metricsImpact": "88% overturned appeal success rate for previously denied claims",
+        "workflowDetail": "Whenever an EOB arrives with an improper denial, our appeal specialists craft evidence-backed appeals citing CDT guidelines and contract terms."
+      },
+      {
+        "id": "ar-cleanup",
+        "badge": "Instant Cash Injection",
+        "title": "Aging Accounts Receivable (AR) Cleanup & Recovery",
+        "iconName": "TrendingUp",
+        "subtitle": "Systematic triage to rescue aging 30, 60, 90, and 120+ day balances.",
+        "deliverables": [
+          "Full audit and triage of all claims over 30 days old",
+          "Systematic payer follow-up via phone, portals, and written demands",
+          "Identification and correction of unposted payments or unapplied credits",
+          "Bi-weekly progress dashboard detailing aging balance burn-down"
+        ],
+        "metricsImpact": "Cuts 90+ day insurance AR by 50% in the first 90 days of engagement",
+        "workflowDetail": "We systematically work your aging report from highest balance and oldest age down, leaving detailed clinical notes on every single patient account."
+      },
+      {
+        "id": "posting",
+        "badge": "Financial Integrity",
+        "title": "Payment Posting & Daily Financial Reconciliation",
+        "iconName": "DollarSign",
+        "subtitle": "Precision EOB and EFT posting so practice collections mirror bank reality.",
+        "deliverables": [
+          "Daily posting of insurance checks, virtual credit cards, and EFT payments",
+          "Accurate contractual write-offs and PPO fee schedule adjustments",
+          "Clear secondary claim generation immediately after primary payment post",
+          "Transparent patient billing balance calculations ready for statements"
+        ],
+        "metricsImpact": "100% reconciliation matching bank deposits with PMS ledger",
+        "workflowDetail": "Every payment is posted line-by-line against specific tooth numbers and procedures. Adjustments are verified against your contracted fee schedules."
+      }
+    ],
+    "subtitle": "From the moment a patient schedules until the final dollar is deposited in your bank, we manage the entire lifecycle."
+  },
+  "aboutPage": {
+    "stats": [
+      {
+        "label": "Insurance Collections Rate",
+        "value": "98.6%"
+      },
+      {
+        "label": "Average Days in AR",
+        "value": "18 Days"
+      },
+      {
+        "label": "Clean Claim 1st-Pass Rate",
+        "value": "99.1%"
+      },
+      {
+        "label": "Clinics & Chains Supported",
+        "value": "Pan-India"
+      }
+    ],
+    "heroTitle": "Dedicated Exclusively to Dental Revenue Cycle Excellence",
+    "storyText": "In 2018, our founders managed multi-location dental offices struggling with chronic insurance hold times, sudden billing staff resignations, and mounting 90+ day aging accounts. Generic medical billing companies failed repeatedly because they did not understand CDT codes, tooth numbers, intraoral attachment requirements, or PPO fee schedules.\n\nWe created DentiSure to provide dentists with an elite, dedicated remote billing department that operates with clinical precision, full ledger transparency, and zero employee turnover risk.",
+    "leadership": [
+      {
+        "bio": "Former clinical hygienist and practice administrator with 16+ years managing multi-specialty dental groups.",
+        "name": "Sarah Mitchell, RDH, CRCR",
+        "role": "Co-Founder & Chief Compliance Officer",
+        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
+        "experience": "16+ Years Dental RCM Experience",
+        "credentials": "RDH, CRCR, HIPAA Compliance Officer"
+      },
+      {
+        "bio": "Specialist in dental financial engineering, clearinghouse integrations, and fee schedule optimization.",
+        "name": "Marcus Vance, MBA",
+        "role": "Co-Founder & Operations Director",
+        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80",
+        "experience": "14+ Years Practice Management",
+        "credentials": "MBA Healthcare Finance, CMPE"
+      },
+      {
+        "bio": "Senior certified dental billing coder specializing in complex periodontal and oral surgery appeals across commercial and Medicaid payers.",
+        "name": "Elena Rostova, CPC, CPB",
+        "role": "Director of Insurance Claims & Appeals",
+        "image": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=80",
+        "experience": "11+ Years Claims Adjudication",
+        "credentials": "AAPC Certified Professional Coder (CPC, CPB)"
+      }
+    ],
+    "storyTitle": "Founded on the Front Lines of Dental Practices",
+    "missionText": "To eliminate the administrative burden of insurance billing so dental providers can focus entirely on high-quality clinical care, confident that every dollar earned is collected promptly and accurately.",
+    "heroSubtitle": "Built by veteran dental billing managers and clinical consultants who understand that behind every claim is a doctor who worked hard and deserves to be paid in full.",
+    "missionTitle": "Our Uncompromising Mission"
+  },
+  "whyChoose": {
+    "badge": "Why Dental Practices Choose DentiSure",
+    "items": [
+      {
+        "id": "wc-1",
+        "num": "01",
+        "title": "Maximize Every Claim",
+        "benefit": "Higher revenue per procedure with zero accidental unbundling or under-coding.",
+        "description": "We ensure all claims are properly documented, accurately coded with current CDT standards, and submitted with essential attachments and clinical narratives."
+      },
+      {
+        "id": "wc-2",
+        "num": "02",
+        "title": "Reduce Payment Delays",
+        "benefit": "Consistent, predictable weekly cash deposits rather than erratic 45-day payment cycles.",
+        "description": "Proactive tracking and rapid electronic submissions mean claims are accepted, adjudicated, and paid faster than standard in-house manual cycles."
+      },
+      {
+        "id": "wc-3",
+        "num": "03",
+        "title": "Minimize Denials & Costly Rework",
+        "benefit": "Less time chasing rejected claims, virtually eliminating avoidable denials.",
+        "description": "Payer-specific scrubbing filters catch missing x-rays, periodontal charts, and narrative mismatches before claims cross clearinghouses."
+      },
+      {
+        "id": "wc-4",
+        "num": "04",
+        "title": "Complete Revenue Cycle Visibility",
+        "benefit": "You maintain full visibility and total financial control without the administrative burden.",
+        "description": "Weekly transparent reports and real-time PMS documentation keep you informed without having to micromanage billing details."
+      },
+      {
+        "id": "wc-5",
+        "num": "05",
+        "title": "True Dental Billing Specialists",
+        "benefit": "Expertise that general medical billing companies simply cannot match.",
+        "description": "Our specialists only do dental billing. We understand the nuances of PPO fee schedules, dual coverage, pre-authorizations, and frequency limitations."
+      },
+      {
+        "id": "wc-6",
+        "num": "06",
+        "title": "A True Extension of Your Practice",
+        "benefit": "Reliable, seamless integration with your existing team and daily office rhythm.",
+        "description": "We operate inside your practice management software via secure VPN. Your patients experience no disruption, and your team gets a supportive partner."
+      }
+    ],
+    "title": "Engineered Specifically for Modern Dental Practices",
+    "subtitle": "We are not a generic medical billing company trying to do dental. Dental billing is our only focus."
+  },
+  "mediaLibrary": [
+    {
+      "id": "media-hero-1",
+      "url": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&auto=format&fit=crop&q=80",
+      "name": "Main Hero Practice & Doctor",
+      "altText": "Doctor reviewing dental ledger analytics in modern clinic",
+      "category": "heroes",
+      "updatedAt": "2026-09-01",
+      "dimensions": "1200x800"
+    },
+    {
+      "id": "media-showcase-1",
+      "url": "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&auto=format&fit=crop&q=80",
+      "name": "Dr. Aris Thorne - Apex Dental",
+      "altText": "Dr Aris Thorne clinical consultation",
+      "category": "showcase",
+      "updatedAt": "2026-09-01",
+      "dimensions": "600x400"
+    },
+    {
+      "id": "media-showcase-2",
+      "url": "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600&auto=format&fit=crop&q=80",
+      "name": "Dr. Jennifer Hayes - Premier Smiles",
+      "altText": "Dr Jennifer Hayes in dental operatory",
+      "category": "showcase",
+      "updatedAt": "2026-09-01",
+      "dimensions": "600x400"
+    },
+    {
+      "id": "media-showcase-3",
+      "url": "https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=600&auto=format&fit=crop&q=80",
+      "name": "Dr. Carlos Ramirez - Metro Pediatric",
+      "altText": "Dr Carlos Ramirez dental team",
+      "category": "showcase",
+      "updatedAt": "2026-09-01",
+      "dimensions": "600x400"
+    },
+    {
+      "id": "media-team-1",
+      "url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80",
+      "name": "Sarah Mitchell - CCO",
+      "altText": "Sarah Mitchell RDH CRCR portrait",
+      "category": "team",
+      "updatedAt": "2026-09-01",
+      "dimensions": "400x400"
+    },
+    {
+      "id": "media-team-2",
+      "url": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80",
+      "name": "Marcus Vance - Operations",
+      "altText": "Marcus Vance MBA portrait",
+      "category": "team",
+      "updatedAt": "2026-09-01",
+      "dimensions": "400x400"
+    },
+    {
+      "id": "media-team-3",
+      "url": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=80",
+      "name": "Elena Rostova - Claims Director",
+      "altText": "Elena Rostova CPC CPB portrait",
+      "category": "team",
+      "updatedAt": "2026-09-01",
+      "dimensions": "400x400"
+    },
+    {
+      "id": "media-test-1",
+      "url": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&auto=format&fit=crop&q=80",
+      "name": "Dr. Jennifer Hayes Avatar",
+      "altText": "Dr Jennifer Hayes portrait",
+      "category": "testimonials",
+      "updatedAt": "2026-09-01",
+      "dimensions": "150x150"
+    },
+    {
+      "id": "media-test-2",
+      "url": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80",
+      "name": "Dr. Aris Thorne Avatar",
+      "altText": "Dr Aris Thorne portrait",
+      "category": "testimonials",
+      "updatedAt": "2026-09-01",
+      "dimensions": "150x150"
+    },
+    {
+      "id": "media-test-3",
+      "url": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=150&auto=format&fit=crop&q=80",
+      "name": "Dr. Carlos Ramirez Avatar",
+      "altText": "Dr Carlos Ramirez portrait",
+      "category": "testimonials",
+      "updatedAt": "2026-09-01",
+      "dimensions": "150x150"
+    },
+    {
+      "id": "media-blog-1",
+      "url": "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&auto=format&fit=crop&q=80",
+      "name": "Verification Checklist Cover",
+      "altText": "Dental billing verification checklist cover",
+      "category": "blog",
+      "updatedAt": "2026-09-01",
+      "dimensions": "800x450"
+    },
+    {
+      "id": "media-blog-2",
+      "url": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80",
+      "name": "Medical Cross-Coding Cover",
+      "altText": "Medical cross coding dental guide",
+      "category": "blog",
+      "updatedAt": "2026-09-01",
+      "dimensions": "800x450"
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "t1",
+      "pms": "Practo Ray & Open Dental",
+      "role": "Lead Dentist & Owner",
+      "image": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=300&auto=format&fit=crop&q=80",
+      "quote": "Before DentiSure, our front desk was drowning in billing paperwork and follow-up calls. Our 60-day aging was sitting at ₹5.8 Lakhs. Within 60 days of partnering with DentiSure, that backlog was cleared down to under ₹80,000, and our collections jumped noticeably in the first month alone.",
+      "location": "Bengaluru, KA",
+      "doctorName": "Dr. Rajesh Sharma, MDS",
+      "practiceName": "Apex Multispecialty Dental Care",
+      "metricsResult": "79% Reduction in Aging AR in 60 Days"
+    },
+    {
+      "id": "t2",
+      "pms": "Clinicea & Dentrix",
+      "role": "Managing Partner",
+      "image": "https://images.unsplash.com/photo-1594824813580-f094a97491cf?w=300&auto=format&fit=crop&q=80",
+      "quote": "DentiSure feels like they are sitting in the room next door, but without the payroll overhead. They log into our PMS every single afternoon, reconcile every payment, and resolve queries before I even notice them. It restored total peace of mind to our clinic.",
+      "location": "Mumbai, MH",
+      "doctorName": "Dr. Priya Nair, BDS, MDS",
+      "practiceName": "Zenith Smiles Dental Clinic",
+      "metricsResult": "Reclaimed 22 Hours/Week for Front Desk"
+    },
+    {
+      "id": "t3",
+      "pms": "Dentrix & Custom PMS",
+      "role": "Founder & Periodontist",
+      "image": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=300&auto=format&fit=crop&q=80",
+      "quote": "Complex surgical and implant procedure reimbursements require precise documentation. DentiSure’s team knows exactly what narratives and clinical records are required. Our first-pass acceptance rate is now 98.4%, and our practice cash flow has never been more predictable.",
+      "location": "New Delhi, DL",
+      "doctorName": "Dr. Amitav Banerjee, MDS",
+      "practiceName": "Capital Dental Specialists",
+      "metricsResult": "98.4% Clean First-Pass Acceptance"
+    }
+  ],
+  "trustMetrics": [
+    {
+      "id": "tm-1",
+      "label": "Clean Claim First-Pass Rate",
+      "value": "98%+",
+      "subtext": "Scrubbed against payer clearinghouse edits before transmission"
+    },
+    {
+      "id": "tm-2",
+      "label": "AR Over 90 Days",
+      "value": "<10%",
+      "subtext": "Compared to the national dental average of 25–35%"
+    },
+    {
+      "id": "tm-3",
+      "label": "Weekly Front-Desk Time Saved",
+      "value": "20+ Hrs",
+      "subtext": "Staff freed from hold times to focus on patient case acceptance"
+    },
+    {
+      "id": "tm-4",
+      "label": "Dedicated Billing Specialists",
+      "value": "100%",
+      "subtext": "Assigned dental revenue cycle coordinator for your specific practice"
+    }
+  ],
+  "photoShowcase": {
+    "items": [
+      {
+        "id": "ps-1",
+        "tag": "₹4.8 Lakhs Recovered in 60 Days",
+        "role": "Chief Clinical Director (4 Operatories)",
+        "image": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=800&auto=format&fit=crop&q=80",
+        "title": "Metro Smiles Multispecialty Dental Center",
+        "clinic": "Apex Dental Care",
+        "location": "Bengaluru, KA",
+        "doctorName": "Dr. Rajesh Sharma, MDS"
+      },
+      {
+        "id": "ps-2",
+        "tag": "22 Hours Saved Weekly",
+        "role": "Managing Partner",
+        "image": "https://images.unsplash.com/photo-1594824813580-f094a97491cf?w=800&auto=format&fit=crop&q=80",
+        "title": "Zenith Dental & Implant Institute",
+        "clinic": "Zenith Smiles Dental",
+        "location": "Mumbai, MH",
+        "doctorName": "Dr. Priya Nair, BDS, MDS"
+      },
+      {
+        "id": "ps-3",
+        "tag": "98.4% Clean First-Pass Rate",
+        "role": "Founder & Senior Periodontist",
+        "image": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=800&auto=format&fit=crop&q=80",
+        "title": "Capital Periodontics & Oral Surgery",
+        "clinic": "Capital Dental Specialists",
+        "location": "New Delhi, DL",
+        "doctorName": "Dr. Amitav Banerjee, MDS"
+      }
+    ],
+    "title": "Real Dental Teams. Verified Clinical Outcomes.",
+    "subtitle": "See how leading solo, pediatric, and multispecialty dental clinics across India run smoother, higher-margin operations with DentiSure."
+  },
+  "solutionsPage": {
+    "heroTitle": "End-to-End Dental Billing Services & Claim Execution",
+    "heroSubtitle": "Every stage of your revenue cycle handled with clinical rigor, CDT coding mastery, and daily accountability directly inside your dental software.",
+    "claimCycleStages": [
+      {
+        "name": "Pre-Visit Breakdown & Eligibility",
+        "outcome": "Zero surprise copays & front-desk friction",
+        "description": "48–72 hours prior to arrival, full 23-point breakdown verified and entered directly into your PMS.",
+        "stageNumber": 1
+      },
+      {
+        "name": "Clinical Narrative & Attachment Assembly",
+        "outcome": "Eliminates attachment request stalls",
+        "description": "Mandatory perio charting, pre-op radiographs, intraoral photographs, and doctor narratives attached per payer rules.",
+        "stageNumber": 2
+      },
+      {
+        "name": "Daily Clean Electronic Batch Submission",
+        "outcome": "98%+ first-pass acceptance within 24h",
+        "description": "Every claim scrubbed against clearinghouse edits and transmitted before close of business.",
+        "stageNumber": 3
+      },
+      {
+        "name": "EFT, Check & Line-Item Payment Posting",
+        "outcome": "100% reconciliation with bank deposits",
+        "description": "Insurance disbursements and allowable contractual adjustments posted to exact tooth numbers.",
+        "stageNumber": 4
+      },
+      {
+        "name": "Assertive Denial Investigation & Appeals",
+        "outcome": "88% overturned appeal recovery rate",
+        "description": "Immediate triage of rejections with peer-to-peer clinical narratives and regulatory appeals.",
+        "stageNumber": 5
+      },
+      {
+        "name": "Active Aging AR Follow-Up & Reporting",
+        "outcome": "<10% AR remaining over 90 days",
+        "description": "Every outstanding claim older than 30 days worked systematically every 14 business days until paid.",
+        "stageNumber": 6
+      }
+    ]
+  },
+  "topTickerItems": [
+    {
+      "badge": "Active",
+      "title": "Pre-Visit Breakdown Entered Directly in Your Practice Management Software",
+      "category": "Insurance Verification"
+    },
+    {
+      "badge": "Active",
+      "title": "Clean Submissions with Tooth-Specific Radiographs & Detailed Narratives",
+      "category": "Claim Scrubbing"
+    },
+    {
+      "badge": "Active",
+      "title": "Daily Line-Item Reconciliation of NEFT, UPI, Cards & Third-Party Claims",
+      "category": "Payment Posting"
+    },
+    {
+      "badge": "Active",
+      "title": "Over 88% Overturned Appeals on Crowns, Implants & Surgical Procedures",
+      "category": "Denial Appeals"
+    },
+    {
+      "badge": "Active",
+      "title": "Zero Unworked Claims Over 30 Days — Disciplined Weekly Follow-up",
+      "category": "Aging Recovery"
+    }
+  ],
+  "secondarySlider": [
+    {
+      "id": "sl-1",
+      "desc": "No duplicate data entry. We work directly inside your practice management software.",
+      "title": "Direct Dentrix & Eaglesoft Remote Access",
+      "category": "PMS Integration"
+    },
+    {
+      "id": "sl-2",
+      "desc": "Full deductibles, remaining maximums, frequency limits, and history entered 72h prior.",
+      "title": "23-Point Insurance Verification Breakdown",
+      "category": "Verification SOP"
+    },
+    {
+      "id": "sl-3",
+      "desc": "Intraoral photos, perio charts, and doctor clinical narratives attached before batch transmit.",
+      "title": "Daily Clean Electronic Submissions",
+      "category": "Claims Scrubbing"
+    },
+    {
+      "id": "sl-4",
+      "desc": "88% overturn rate on crown downgrades, surgical extractions, and periodontal coding.",
+      "title": "Aggressive Appeals on Unjustified Denials",
+      "category": "Denial Recovery"
+    },
+    {
+      "id": "sl-5",
+      "desc": "Every EFT, ERA, and insurance check posted and balanced against bank deposits daily.",
+      "title": "Line-Item Tooth Reconciliation & EOB Balancing",
+      "category": "Payment Posting"
+    },
+    {
+      "id": "sl-6",
+      "desc": "Zero claims forgotten or written off due to timely filing deadlines.",
+      "title": "14-Day Systematic Touch Cycle on Aging Balances",
+      "category": "AR Management"
+    }
+  ]
+}

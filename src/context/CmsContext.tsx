@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import {
   CmsData,
   LeadSubmission,
@@ -109,6 +109,22 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Helper to merge database payload cleanly with fallback safety
   const mergeWithAuthoritativePayload = (serverData: any): CmsData => {
+    const rawHeader = serverData?.header || {};
+    const rawFooter = serverData?.footer || {};
+    const rawBranding = serverData?.branding || {};
+
+    // Robust logo resolution: check both direct section and branding sub-object
+    const resolvedHeaderLogo = (rawHeader.logoUrl && typeof rawHeader.logoUrl === 'string' && rawHeader.logoUrl.trim() !== '')
+      ? rawHeader.logoUrl.trim()
+      : (rawBranding.headerLogoUrl || rawBranding.customLogoUrl || rawBranding.googleDriveLogoUrl || '');
+
+    const resolvedFooterLogo = (rawFooter.logoUrl && typeof rawFooter.logoUrl === 'string' && rawFooter.logoUrl.trim() !== '')
+      ? rawFooter.logoUrl.trim()
+      : (rawBranding.footerLogoUrl || rawBranding.customLogoUrl || rawBranding.googleDriveLogoUrl || '');
+
+    const resolvedHeaderHeight = Number(rawHeader.logoHeight || rawBranding.headerLogoHeight) || 44;
+    const resolvedFooterHeight = Number(rawFooter.logoHeight || rawBranding.footerLogoHeight) || 40;
+
     return {
       ...INITIAL_CMS_DATA,
       ...serverData,
@@ -118,35 +134,23 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       },
       header: {
         ...INITIAL_CMS_DATA.header,
-        ...(serverData?.header || {}),
-        logoUrl:
-          serverData?.header?.logoUrl !== undefined
-            ? serverData.header.logoUrl
-            : serverData?.branding?.headerLogoUrl || '',
-        logoHeight:
-          serverData?.header?.logoHeight ||
-          serverData?.branding?.headerLogoHeight ||
-          44,
+        ...rawHeader,
+        logoUrl: resolvedHeaderLogo,
+        logoHeight: resolvedHeaderHeight,
       },
       footer: {
         ...INITIAL_CMS_DATA.footer,
-        ...(serverData?.footer || {}),
-        logoUrl:
-          serverData?.footer?.logoUrl !== undefined
-            ? serverData.footer.logoUrl
-            : serverData?.branding?.footerLogoUrl || '',
-        logoHeight:
-          serverData?.footer?.logoHeight ||
-          serverData?.branding?.footerLogoHeight ||
-          40,
+        ...rawFooter,
+        logoUrl: resolvedFooterLogo,
+        logoHeight: resolvedFooterHeight,
       },
       branding: {
         ...INITIAL_CMS_DATA.branding,
-        ...(serverData?.branding || {}),
-        headerLogoUrl:
-          serverData?.branding?.headerLogoUrl || serverData?.header?.logoUrl || '',
-        footerLogoUrl:
-          serverData?.branding?.footerLogoUrl || serverData?.footer?.logoUrl || '',
+        ...rawBranding,
+        headerLogoUrl: resolvedHeaderLogo,
+        footerLogoUrl: resolvedFooterLogo,
+        headerLogoHeight: resolvedHeaderHeight,
+        footerLogoHeight: resolvedFooterHeight,
       },
       topSlider: serverData?.topSlider
         ? {
@@ -233,10 +237,19 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (_) {}
   }, [adminUser]);
 
+  // Debounce ref for background auto-sync to avoid race conditions and parallel overwrites
+  const autoSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Save explicitly to authoritative Supabase Cloud Database storage
   const saveToServer = async (
     dataToSave?: CmsData
   ): Promise<{ success: boolean; error?: string; provider?: string }> => {
+    // Clear any pending debounced background auto-sync so this explicit save takes absolute precedence
+    if (autoSyncTimeoutRef.current) {
+      clearTimeout(autoSyncTimeoutRef.current);
+      autoSyncTimeoutRef.current = null;
+    }
+
     const payload = dataToSave || cmsData;
     setIsSyncingServer(true);
     try {
@@ -268,16 +281,23 @@ export const CmsProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  // Helper to update React state AND immediately persist to Supabase
+  // Helper to update React state AND persist to Supabase in a debounced, race-free manner
   const persistAndSet = (updater: (prev: CmsData) => CmsData) => {
     setCmsData((prev) => {
       const updated = updater(prev);
-      // Immediately sync with Supabase in background
-      fetch('/api/cms', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
-        body: JSON.stringify({ data: updated }),
-      }).catch((e) => console.error('[CMS Context] Auto-sync to Supabase error:', e));
+      
+      // Debounce auto-sync so multiple quick edits or batch updates don't fire competing network requests
+      if (autoSyncTimeoutRef.current) {
+        clearTimeout(autoSyncTimeoutRef.current);
+      }
+      autoSyncTimeoutRef.current = setTimeout(() => {
+        fetch('/api/cms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+          body: JSON.stringify({ data: updated }),
+        }).catch((e) => console.error('[CMS Context] Auto-sync to Supabase error:', e));
+      }, 800);
+
       return updated;
     });
   };

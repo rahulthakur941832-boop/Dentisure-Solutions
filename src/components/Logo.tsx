@@ -74,6 +74,11 @@ export const Logo: React.FC<LogoProps> = ({
 
   const directLogoUrl = configuredLogo ? getGoogleDriveDirectImageUrl(configuredLogo) : null;
 
+  // Reset image error state whenever logo URL changes
+  React.useEffect(() => {
+    setImgError(false);
+  }, [directLogoUrl]);
+
   // 1. If a custom uploaded / URL / Google Drive logo exists and hasn't errored
   if (directLogoUrl && !imgError) {
     return (

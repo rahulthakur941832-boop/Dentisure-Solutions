@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCms } from '../../context/CmsContext';
 import { getGoogleDriveDirectImageUrl } from '../../utils/googleDrive';
 import { HeaderNavItem, NavigationPage, SecondarySliderItem, CmsData } from '../../types';
@@ -66,6 +66,14 @@ export const GlobalSettingsView: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'header' | 'slider' | 'footer' | 'brand' | 'branding'>('header');
   const [savedAlert, setSavedAlert] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const isDirtyRef = useRef(false);
+  const [saveStatusMessage, setSaveStatusMessage] = useState<string | null>(null);
+
+  const markDirty = () => {
+    isDirtyRef.current = true;
+    setIsDirty(true);
+  };
 
   // Local state copies
   const [brand, setBrand] = useState(cmsData.brand);
@@ -93,33 +101,62 @@ export const GlobalSettingsView: React.FC = () => {
     showLogoImage: false,
   });
 
-  // Keep local copies in sync when authoritative server CMS data loads
+  // Keep local copies in sync when authoritative server CMS data loads (only if user hasn't made unsaved edits)
   useEffect(() => {
-    setBrand(cmsData.brand);
-    setHeaderConfig({
-      ...cmsData.header,
-      logoUrl: cmsData.header?.logoUrl || cmsData.branding?.headerLogoUrl || '',
-      logoHeight: cmsData.header?.logoHeight || 44,
-    });
-    setSliderCards(cmsData.secondarySlider || []);
-    setFooter({
-      ...cmsData.footer,
-      logoUrl: cmsData.footer?.logoUrl || cmsData.branding?.footerLogoUrl || '',
-      logoHeight: cmsData.footer?.logoHeight || 40,
-    });
-    setBranding({
-      headerLogoUrl: cmsData.header?.logoUrl || cmsData.branding?.headerLogoUrl || '',
-      footerLogoUrl: cmsData.footer?.logoUrl || cmsData.branding?.footerLogoUrl || '',
-      headerLogoHeight: cmsData.header?.logoHeight || cmsData.branding?.headerLogoHeight || 44,
-      footerLogoHeight: cmsData.footer?.logoHeight || cmsData.branding?.footerLogoHeight || 40,
-      googleDriveLogoUrl: cmsData.branding?.googleDriveLogoUrl || '',
-      googleDriveFaviconUrl: cmsData.branding?.googleDriveFaviconUrl || '',
-      customLogoUrl: cmsData.branding?.customLogoUrl || '',
-      customFaviconUrl: cmsData.branding?.customFaviconUrl || '',
-      agencyCredit: cmsData.footer.agencyCredit || cmsData.branding?.agencyCredit || 'Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)',
-      showLogoImage: false,
-    });
+    if (!isDirtyRef.current) {
+      setBrand(cmsData.brand);
+      const headerLogo = cmsData.header?.logoUrl || cmsData.branding?.headerLogoUrl || '';
+      const footerLogo = cmsData.footer?.logoUrl || cmsData.branding?.footerLogoUrl || '';
+      setHeaderConfig({
+        ...cmsData.header,
+        logoUrl: headerLogo,
+        logoHeight: cmsData.header?.logoHeight || 44,
+      });
+      setSliderCards(cmsData.secondarySlider || []);
+      setFooter({
+        ...cmsData.footer,
+        logoUrl: footerLogo,
+        logoHeight: cmsData.footer?.logoHeight || 40,
+      });
+      setBranding({
+        headerLogoUrl: headerLogo,
+        footerLogoUrl: footerLogo,
+        headerLogoHeight: cmsData.header?.logoHeight || cmsData.branding?.headerLogoHeight || 44,
+        footerLogoHeight: cmsData.footer?.logoHeight || cmsData.branding?.footerLogoHeight || 40,
+        googleDriveLogoUrl: cmsData.branding?.googleDriveLogoUrl || '',
+        googleDriveFaviconUrl: cmsData.branding?.googleDriveFaviconUrl || '',
+        customLogoUrl: cmsData.branding?.customLogoUrl || '',
+        customFaviconUrl: cmsData.branding?.customFaviconUrl || '',
+        agencyCredit: cmsData.footer.agencyCredit || cmsData.branding?.agencyCredit || 'Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)',
+        showLogoImage: false,
+      });
+    }
   }, [cmsData]);
+
+  // Unified logo update mutators - updates both direct section and branding sub-object synchronously
+  const updateHeaderLogo = (url: string) => {
+    markDirty();
+    setHeaderConfig((prev) => ({ ...prev, logoUrl: url }));
+    setBranding((prev) => ({ ...prev, headerLogoUrl: url }));
+  };
+
+  const updateHeaderLogoHeight = (h: number) => {
+    markDirty();
+    setHeaderConfig((prev) => ({ ...prev, logoHeight: h }));
+    setBranding((prev) => ({ ...prev, headerLogoHeight: h }));
+  };
+
+  const updateFooterLogo = (url: string) => {
+    markDirty();
+    setFooter((prev) => ({ ...prev, logoUrl: url }));
+    setBranding((prev) => ({ ...prev, footerLogoUrl: url }));
+  };
+
+  const updateFooterLogoHeight = (h: number) => {
+    markDirty();
+    setFooter((prev) => ({ ...prev, logoHeight: h }));
+    setBranding((prev) => ({ ...prev, footerLogoHeight: h }));
+  };
 
   // New nav item form state
   const [newNavLabel, setNewNavLabel] = useState('');
@@ -133,14 +170,23 @@ export const GlobalSettingsView: React.FC = () => {
 
   const triggerSaveToast = () => {
     setSavedAlert(true);
-    setTimeout(() => setSavedAlert(false), 3000);
+    setTimeout(() => setSavedAlert(false), 4000);
   };
 
   const handleSaveAll = async () => {
-    const finalHeaderLogo = headerConfig.logoUrl || branding.headerLogoUrl || '';
-    const finalHeaderHeight = headerConfig.logoHeight || branding.headerLogoHeight || 44;
-    const finalFooterLogo = footer.logoUrl || branding.footerLogoUrl || '';
-    const finalFooterHeight = footer.logoHeight || branding.footerLogoHeight || 40;
+    setSaveStatusMessage('Publishing authoritative settings to Supabase SSoT...');
+
+    const finalHeaderLogo = (headerConfig.logoUrl && headerConfig.logoUrl.trim() !== '')
+      ? headerConfig.logoUrl.trim()
+      : (branding.headerLogoUrl || branding.customLogoUrl || branding.googleDriveLogoUrl || '');
+
+    const finalHeaderHeight = Number(headerConfig.logoHeight || branding.headerLogoHeight) || 44;
+
+    const finalFooterLogo = (footer.logoUrl && footer.logoUrl.trim() !== '')
+      ? footer.logoUrl.trim()
+      : (branding.footerLogoUrl || branding.customLogoUrl || branding.googleDriveLogoUrl || '');
+
+    const finalFooterHeight = Number(footer.logoHeight || branding.footerLogoHeight) || 40;
 
     const updatedHeader = {
       ...headerConfig,
@@ -172,15 +218,19 @@ export const GlobalSettingsView: React.FC = () => {
       branding: updatedBranding,
     };
 
-    updateSection('brand', brand);
-    updateSection('header', updatedHeader);
-    updateSection('secondarySlider', sliderCards);
-    updateSection('footer', updatedFooter);
-    updateSection('branding', updatedBranding);
+    // Save directly to Supabase cloud storage (atomic single POST, zero race conditions)
+    const result = await saveToServer(fullPayload);
 
-    // Save to real server disk storage immediately so all other browsers & incognito sessions see changes
-    await saveToServer(fullPayload);
-    triggerSaveToast();
+    if (result.success) {
+      isDirtyRef.current = false;
+      setIsDirty(false);
+      setSaveStatusMessage('Saved & Published to Supabase SSoT! Live on website & Incognito.');
+      triggerSaveToast();
+      setTimeout(() => setSaveStatusMessage(null), 4000);
+    } else {
+      setSaveStatusMessage(`Save warning: ${result.error || 'Failed to sync with Supabase'}`);
+      setTimeout(() => setSaveStatusMessage(null), 6000);
+    }
   };
 
   const handleCreateNavItem = (e: React.FormEvent) => {
@@ -236,12 +286,22 @@ export const GlobalSettingsView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {savedAlert && (
-            <div className="px-3.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 animate-in fade-in shadow-xs">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Saved &amp; Published Server-Wide (Live in Incognito &amp; All Browsers)</span>
+          {saveStatusMessage ? (
+            <div className="px-3.5 py-1.5 bg-teal-50 text-teal-900 border border-teal-300 rounded-xl text-xs font-bold flex items-center gap-1.5 animate-in fade-in shadow-xs">
+              <CheckCircle2 className="w-4 h-4 text-teal-600 shrink-0" />
+              <span>{saveStatusMessage}</span>
             </div>
-          )}
+          ) : savedAlert ? (
+            <div className="px-3.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 animate-in fade-in shadow-xs">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Saved &amp; Published to Supabase SSoT (Live in Incognito &amp; All Devices)</span>
+            </div>
+          ) : isDirty ? (
+            <div className="px-3 py-1 bg-amber-50 text-amber-800 border border-amber-300 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span>Unsaved changes</span>
+            </div>
+          ) : null}
           <button
             onClick={handleSaveAll}
             disabled={isSyncingServer}
@@ -250,7 +310,7 @@ export const GlobalSettingsView: React.FC = () => {
             {isSyncingServer ? (
               <>
                 <RotateCcw className="w-4 h-4 animate-spin" />
-                <span>Saving to Server...</span>
+                <span>Saving to Supabase...</span>
               </>
             ) : (
               <>
@@ -304,22 +364,13 @@ export const GlobalSettingsView: React.FC = () => {
               label="Header Navigation Logo (White / Light Canvas)"
               description="Upload an SVG, PNG, or WebP logo file or enter an image URL. Full-color horizontal logo lockup recommended."
               value={headerConfig.logoUrl || branding.headerLogoUrl || ''}
-              onChange={(url) => {
-                setHeaderConfig((prev) => ({ ...prev, logoUrl: url }));
-                setBranding((prev) => ({ ...prev, headerLogoUrl: url }));
-              }}
-              onReset={() => {
-                setHeaderConfig((prev) => ({ ...prev, logoUrl: '' }));
-                setBranding((prev) => ({ ...prev, headerLogoUrl: '' }));
-              }}
+              onChange={updateHeaderLogo}
+              onReset={() => updateHeaderLogo('')}
               defaultLogoSrc="/logo-dentisure.svg"
               defaultLogoAlt="Official DentiSure Header Logo"
               tag="header-logo"
               heightValue={headerConfig.logoHeight || branding.headerLogoHeight || 44}
-              onHeightChange={(h) => {
-                setHeaderConfig((prev) => ({ ...prev, logoHeight: h }));
-                setBranding((prev) => ({ ...prev, headerLogoHeight: h }));
-              }}
+              onHeightChange={updateHeaderLogoHeight}
               defaultHeight={44}
               minHeight={28}
               maxHeight={72}
@@ -686,22 +737,13 @@ export const GlobalSettingsView: React.FC = () => {
               label="Footer Logo (Dark Navy Canvas)"
               description="Upload an SVG, PNG, or WebP logo file or enter an image URL. Recommended: White or light-colored artwork with transparent background."
               value={footer.logoUrl || branding.footerLogoUrl || ''}
-              onChange={(url) => {
-                setFooter((prev) => ({ ...prev, logoUrl: url }));
-                setBranding((prev) => ({ ...prev, footerLogoUrl: url }));
-              }}
-              onReset={() => {
-                setFooter((prev) => ({ ...prev, logoUrl: '' }));
-                setBranding((prev) => ({ ...prev, footerLogoUrl: '' }));
-              }}
+              onChange={updateFooterLogo}
+              onReset={() => updateFooterLogo('')}
               defaultLogoSrc="/logo-dentisure-white.svg"
               defaultLogoAlt="Official DentiSure White Footer Logo"
               tag="footer-logo"
               heightValue={footer.logoHeight || branding.footerLogoHeight || 40}
-              onHeightChange={(h) => {
-                setFooter((prev) => ({ ...prev, logoHeight: h }));
-                setBranding((prev) => ({ ...prev, footerLogoHeight: h }));
-              }}
+              onHeightChange={updateFooterLogoHeight}
               defaultHeight={40}
               minHeight={24}
               maxHeight={72}
@@ -713,57 +755,79 @@ export const GlobalSettingsView: React.FC = () => {
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
             <h2 className="text-sm font-bold text-slate-900">Footer Notices, Copyright &amp; Agency Attribution</h2>
 
-          <div>
-            <label className="block font-bold text-slate-700 mb-1">About Company Summary</label>
-            <textarea
-              rows={3}
-              value={footer.aboutText}
-              onChange={(e) => setFooter({ ...footer, aboutText: e.target.value })}
-              className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl leading-relaxed"
-            />
-          </div>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">About Company Summary</label>
+              <textarea
+                rows={3}
+                value={footer.aboutText}
+                onChange={(e) => {
+                  markDirty();
+                  setFooter({ ...footer, aboutText: e.target.value });
+                }}
+                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl leading-relaxed"
+              />
+            </div>
 
-          <div>
-            <label className="block font-bold text-slate-700 mb-1">Copyright Line</label>
-            <input
-              type="text"
-              value={footer.copyright}
-              onChange={(e) => setFooter({ ...footer, copyright: e.target.value })}
-              className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium"
-            />
-          </div>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Copyright Line</label>
+              <input
+                type="text"
+                value={footer.copyright}
+                onChange={(e) => {
+                  markDirty();
+                  setFooter({ ...footer, copyright: e.target.value });
+                }}
+                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-medium"
+              />
+            </div>
 
-          <div>
-            <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#16A6A3]" />
-              <span>Agency Credit (Built By ClickIn Digital Marketing Agency)</span>
-            </label>
-            <input
-              type="text"
-              value={footer.agencyCredit || branding.agencyCredit || ''}
-              onChange={(e) => {
-                setFooter({ ...footer, agencyCredit: e.target.value });
-                setBranding({ ...branding, agencyCredit: e.target.value });
-              }}
-              placeholder="Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)"
-              className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800"
-            />
-            <p className="text-[11px] text-slate-500 mt-1">
-              Appears prominently in the bottom bar badge of the website footer across all pages.
-            </p>
-          </div>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#16A6A3]" />
+                <span>Agency Credit (Built By ClickIn Digital Marketing Agency)</span>
+              </label>
+              <input
+                type="text"
+                value={footer.agencyCredit || branding.agencyCredit || ''}
+                onChange={(e) => {
+                  markDirty();
+                  setFooter({ ...footer, agencyCredit: e.target.value });
+                  setBranding({ ...branding, agencyCredit: e.target.value });
+                }}
+                placeholder="Website Designed & Developed by ClickIn Digital Marketing Agency (ClickIn DMA)"
+                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800"
+              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                Appears prominently in the bottom bar badge of the website footer across all pages.
+              </p>
+            </div>
 
-          <div>
-            <label className="block font-bold text-slate-700 mb-1">Regulatory Legal Disclaimer</label>
-            <textarea
-              rows={4}
-              value={footer.disclaimer}
-              onChange={(e) => setFooter({ ...footer, disclaimer: e.target.value })}
-              className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-700 leading-relaxed"
-            />
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Regulatory Legal Disclaimer</label>
+              <textarea
+                rows={4}
+                value={footer.disclaimer}
+                onChange={(e) => {
+                  markDirty();
+                  setFooter({ ...footer, disclaimer: e.target.value });
+                }}
+                className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-700 leading-relaxed"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={handleSaveAll}
+                disabled={isSyncingServer}
+                className="px-5 py-2.5 bg-[#006A68] hover:bg-[#00504E] text-white rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer shadow-sm transition-all disabled:opacity-60"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>{isSyncingServer ? 'Saving to Supabase...' : 'Save Footer Settings'}</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       )}
 
       {/* TAB 4: BRAND & CONTACT (INDIA) */}
@@ -913,22 +977,13 @@ export const GlobalSettingsView: React.FC = () => {
               label="Footer Logo File &amp; Settings"
               description="Appears in the dark footer across all pages. White or high-contrast vector/PNG recommended."
               value={footer.logoUrl || branding.footerLogoUrl || ''}
-              onChange={(url) => {
-                setFooter((prev) => ({ ...prev, logoUrl: url }));
-                setBranding((prev) => ({ ...prev, footerLogoUrl: url }));
-              }}
-              onReset={() => {
-                setFooter((prev) => ({ ...prev, logoUrl: '' }));
-                setBranding((prev) => ({ ...prev, footerLogoUrl: '' }));
-              }}
+              onChange={updateFooterLogo}
+              onReset={() => updateFooterLogo('')}
               defaultLogoSrc="/logo-dentisure-white.svg"
               defaultLogoAlt="DentiSure Official Footer Logo"
               tag="footer-logo"
               heightValue={footer.logoHeight || branding.footerLogoHeight || 40}
-              onHeightChange={(h) => {
-                setFooter((prev) => ({ ...prev, logoHeight: h }));
-                setBranding((prev) => ({ ...prev, footerLogoHeight: h }));
-              }}
+              onHeightChange={updateFooterLogoHeight}
               defaultHeight={40}
               minHeight={24}
               maxHeight={72}
@@ -947,22 +1002,13 @@ export const GlobalSettingsView: React.FC = () => {
               label="Header Navigation Logo File &amp; Settings"
               description="Appears in the top white header on all pages. Full color SVG or PNG recommended."
               value={headerConfig.logoUrl || branding.headerLogoUrl || ''}
-              onChange={(url) => {
-                setHeaderConfig((prev) => ({ ...prev, logoUrl: url }));
-                setBranding((prev) => ({ ...prev, headerLogoUrl: url }));
-              }}
-              onReset={() => {
-                setHeaderConfig((prev) => ({ ...prev, logoUrl: '' }));
-                setBranding((prev) => ({ ...prev, headerLogoUrl: '' }));
-              }}
+              onChange={updateHeaderLogo}
+              onReset={() => updateHeaderLogo('')}
               defaultLogoSrc="/logo-dentisure.svg"
               defaultLogoAlt="DentiSure Official Header Logo"
               tag="header-logo"
               heightValue={headerConfig.logoHeight || branding.headerLogoHeight || 44}
-              onHeightChange={(h) => {
-                setHeaderConfig((prev) => ({ ...prev, logoHeight: h }));
-                setBranding((prev) => ({ ...prev, headerLogoHeight: h }));
-              }}
+              onHeightChange={updateHeaderLogoHeight}
               defaultHeight={44}
               minHeight={28}
               maxHeight={72}
@@ -982,9 +1028,11 @@ export const GlobalSettingsView: React.FC = () => {
               description="Appears in the browser tab title bar (square 32x32 or 64x64 icon)."
               value={branding.customFaviconUrl || branding.googleDriveFaviconUrl || ''}
               onChange={(url) => {
+                markDirty();
                 setBranding((prev) => ({ ...prev, customFaviconUrl: url, googleDriveFaviconUrl: url }));
               }}
               onReset={() => {
+                markDirty();
                 setBranding((prev) => ({ ...prev, customFaviconUrl: '', googleDriveFaviconUrl: '' }));
               }}
               defaultLogoSrc="/logo-transparent.png"
@@ -997,6 +1045,41 @@ export const GlobalSettingsView: React.FC = () => {
               backgroundVariant="light"
               recommendedFormatText="Square PNG, SVG, or ICO (32x32 or 64x64)"
             />
+          </div>
+
+          {/* Action Bar inside Tab 5 */}
+          <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="text-[11px] text-slate-500">
+              {isDirty ? (
+                <span className="text-amber-700 font-bold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  Unsaved brand &amp; logo changes. Click the button to persist to Supabase SSoT.
+                </span>
+              ) : (
+                <span className="text-emerald-700 font-semibold flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  All brand logos &amp; identity settings are synced with Supabase.
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={handleSaveAll}
+              disabled={isSyncingServer}
+              className="px-6 py-2.5 bg-[#006A68] hover:bg-[#00504E] text-white rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md transition-all disabled:opacity-60"
+            >
+              {isSyncingServer ? (
+                <>
+                  <RotateCcw className="w-4 h-4 animate-spin" />
+                  <span>Saving to Supabase...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Save Brand Settings &amp; Publish Logo</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
@@ -1174,6 +1257,36 @@ export const GlobalSettingsView: React.FC = () => {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Floating Sticky Save Bar when dirty */}
+      {isDirty && (
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-xl w-[92%] bg-[#12304A] text-white p-3.5 px-5 rounded-2xl shadow-2xl border border-teal-500/30 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+            <span className="text-xs font-semibold text-slate-200 truncate">
+              You have unsaved changes in Global Settings &amp; Branding
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleSaveAll}
+            disabled={isSyncingServer}
+            className="px-4 py-2 bg-[#16A6A3] hover:bg-[#006A68] text-white rounded-xl text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer shadow-md transition-all disabled:opacity-60"
+          >
+            {isSyncingServer ? (
+              <>
+                <RotateCcw className="w-3.5 h-3.5 animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-3.5 h-3.5" />
+                <span>Save to Supabase SSoT</span>
+              </>
+            )}
+          </button>
         </div>
       )}
     </div>
